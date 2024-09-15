@@ -21,11 +21,12 @@ from models.mamba.mamba2 import Mamba2, Mamba2Config
 from models.mamba.mamba import Mamba, MambaConfig
 
 class LM(nn.Module):
-    def __init__(self, model_config: Union[TransformerConfig, MambaConfig, Mamba2Config], vocab_size: int):
+    def __init__(self, model_config: Union[TransformerConfig, MambaConfig, Mamba2Config], vocab_size: int, rng: torch.Generator):
         super().__init__()
 
         self.config = model_config
         self.vocab_size = vocab_size
+        self.rng = rng
 
         self.embedding = nn.Embedding(self.vocab_size, self.config.d_model, padding_idx=0)
         
@@ -51,15 +52,15 @@ class LM(nn.Module):
                     if any(pn.endswith(w) for w in ['sa.c_proj.weight', 'mlp.fc_3.weight']):
                         std = std / math.sqrt(2 * self.config.n_layers)
                     
-                    torch.nn.init.normal_(p, mean=0.0, std=std / math.sqrt(self.config.mup_width_mult))
+                    torch.nn.init.normal_(p, mean=0.0, std=std / math.sqrt(self.config.mup_width_mult), generator=self.rng)
                 elif pn.endswith('sa.query_proj.weight'):
                     torch.nn.init.zeros_(p) # init query proj to zeros
                 elif pn == "embedding.weight":
-                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std)
+                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std, generator=self.rng)
                 elif pn == "lm_head.weight":
                     torch.nn.init.zeros_(p)
                 elif pn == "core.PE.weight":
-                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std)
+                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std, generator=self.rng)
                 else:
                     # here, we only have biases and rotary_emb.freqs
                     assert p.dim() == 1, f"a 2d param ({pn}) has not been filtered out for init. please check."
@@ -78,13 +79,13 @@ class LM(nn.Module):
                     if 'mixer.dt_proj.weight' in pn:
                         std = self.config.dt_rank**-0.5 * self.config.dt_scale
 
-                    torch.nn.init.normal_(p, mean=0.0, std=std / math.sqrt(self.config.mup_width_mult))
+                    torch.nn.init.normal_(p, mean=0.0, std=std / math.sqrt(self.config.mup_width_mult), generator=self.rng)
                 elif 'mixer.x_BC_proj.weight' in pn:
                     torch.nn.init.zeros_(p[self.config.dt_rank:])
                 elif 'mixer.conv1d.weight' in pn:
                     torch.nn.init.zeros_(p)
                 elif pn == "embedding.weight":
-                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std)
+                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std, generator=self.rng)
                 elif pn == "lm_head.weight":
                     torch.nn.init.zeros_(p)
                 elif any(pn.endswith(w) for w in ['mixer.A_log', 'mixer.D']):
@@ -105,13 +106,13 @@ class LM(nn.Module):
                     if 'mixer.out_proj.weight' in pn:
                         std = std / math.sqrt(2 * self.config.n_layers)
 
-                    torch.nn.init.normal_(p, mean=0.0, std=std / math.sqrt(self.config.mup_width_mult))
+                    torch.nn.init.normal_(p, mean=0.0, std=std / math.sqrt(self.config.mup_width_mult), generator=self.rng)
                 
                 elif 'mixer.conv1d.weight' in pn:
                     torch.nn.init.zeros_(p)
                 
                 elif pn == "embedding.weight":
-                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std)
+                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std, generator=self.rng)
                 
                 elif pn == "lm_head.weight":
                     torch.nn.init.zeros_(p)
@@ -129,7 +130,7 @@ class LM(nn.Module):
             self.apply(self._init_weights)
             for pn, p in self.named_parameters():
                 if pn.endswith('fc_3.weight') or pn.endswith('c_proj.weight') or pn.endswith('mixer.out_proj.weight'):
-                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std/math.sqrt(2 * self.config.n_layers))
+                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std/math.sqrt(2 * self.config.n_layers), generator=self.rng)
 
     def forward(self, tokens, caches=None, seq_pos=0):
         # tokens : (B, L)
@@ -385,11 +386,11 @@ class LM(nn.Module):
     # taken from llama2.c
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std)
+            torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std, generator=self.rng)
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std)
+            torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std, generator=self.rng)
 
     # adapted from llama2.c, with muP
     def configure_optimizers(self, weight_decay, learning_rate, betas, device_type):
