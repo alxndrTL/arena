@@ -253,7 +253,7 @@ model = LM(config, vocab_size=vocab_size, rng=g).to(device)
 
 config = TransformerLlamaConfig(block_size=ctx_len, vocab_size=vocab_size, n_layer=n_layers, n_head=n_heads, n_kv_head=n_kv_heads, n_embd=d_model,
                                 multiple_of=256, ffn_dim_multiplier=3.5, rope_theta=rope_theta, use_scaled_rop=False, flash=True)
-model = LLaMA(config)
+model = LLaMA(config).to(device)
 
 if optimizer == "AdamW":
     optim = model.configure_optimizers(weight_decay, lr, (adam_b1, adam_b2), device_type, 0)
