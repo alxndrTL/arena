@@ -264,6 +264,7 @@ class TransformerLlamaConfig:
         for k, v in kwargs.items():
             if hasattr(self, k):
                 setattr(self, k, v)
+
         assert self.n_kv_head <= self.n_head
         assert self.n_head % self.n_kv_head == 0
         assert self.n_embd % self.n_head == 0
