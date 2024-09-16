@@ -117,7 +117,7 @@ adam_b2 = 0.95
 clip_value_grad = 1.0
 weight_decay = 0.1
 
-use_torch_compile = False # do not toggle if using Mamba
+use_torch_compile = True # do not toggle if using Mamba
 
 device = "cuda" # "cpu", "cuda:0", "cuda:1", ...
 dtype = "bfloat16" # "float32" or "bfloat16"
@@ -252,7 +252,7 @@ model = LM(config, vocab_size=vocab_size, rng=g).to(device)
 """
 
 config = TransformerLlamaConfig(block_size=ctx_len, vocab_size=vocab_size, n_layer=n_layers, n_head=n_heads, n_kv_head=n_kv_heads, n_embd=d_model,
-                                multiple_of=256, ffn_dim_multiplier=3.5, rope_theta=rope_theta, use_scaled_rop=False, flash=True)
+                                multiple_of=1, ffn_dim_multiplier=1.3, rope_theta=rope_theta, use_scaled_rop=False, flash=True)
 model = LLaMA(config).to(device)
 
 if optimizer == "AdamW":
@@ -301,9 +301,6 @@ try:
 
             with dtype_ctx:
                 logits = model(x)
-                print(logits.shape)
-                print(logits.view(-1, logits.size(-1)).shape)
-                print(y.view(-1).shape)
                 loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
                 loss = loss / grad_acc_steps
                 loss_total += loss.detach()

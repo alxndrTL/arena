@@ -1,18 +1,21 @@
 Run name: PCITZMzt.
 DataLoader: total number of tokens: 10,255,324,043 across 103 files
 DataLoader: total number of tokens: 100,000,000 across 1 files
-num decayed parameter tensors: 62, with 303,687,168 parameters
+num decayed parameter tensors: 62, with 179,105,280 parameters
 num non-decayed parameter tensors: 25, with 19,200 parameters
 using fused AdamW: True
 using regular AdamW
-Model initialized. Number of parameters : 303706368.
+Model initialized. Number of parameters : 179124480.
+Compiling the model...
+Done compiling.
 Training is starting.
-torch.Size([16, 1, 50257])
-torch.Size([16, 50257])
-torch.Size([16384])
+/usr/local/lib/python3.10/dist-packages/torch/_inductor/lowering.py:1611: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
 Traceback (most recent call last):
-  File "/workspace/arena/train.py", line 307, in <module>
-    loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
-  File "/usr/local/lib/python3.10/dist-packages/torch/nn/functional.py", line 3059, in cross_entropy
-    return torch._C._nn.cross_entropy_loss(input, target, weight, _Reduction.get_enum(reduction), ignore_index, label_smoothing)
-ValueError: Expected input batch_size (16) to match target batch_size (16384).
+  File "/workspace/arena/train.py", line 308, in <module>
+    loss.backward()
+  File "/usr/local/lib/python3.10/dist-packages/torch/_tensor.py", line 522, in backward
+    torch.autograd.backward(
+  File "/usr/local/lib/python3.10/dist-packages/torch/autograd/__init__.py", line 266, in backward
+    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.07 GiB. GPU 0 has a total capacity of 23.65 GiB of which 2.51 GiB is free. Process 3683431 has 21.13 GiB memory in use. Of the allocated memory 16.67 GiB is allocated by PyTorch, and 4.00 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
