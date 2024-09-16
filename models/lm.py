@@ -42,7 +42,7 @@ class LM(nn.Module):
         self.out_norm = RMSNorm(self.config.d_model, self.config.norm_eps, self.config.mup)
 
         self.lm_head = nn.Linear(self.config.d_model, self.vocab_size, bias=False)
-        #self.embedding.weight = self.lm_head.weight
+        self.embedding.weight = self.lm_head.weight
 
         if self.config.mup and isinstance(self.config, TransformerConfig):
             for pn, p in self.named_parameters():

@@ -90,22 +90,23 @@ use_mup = False
 mup_base_width = 288
 
 # --- training parameters ---
-num_iters = 100000
-batch_size = 16
+num_iters = 8200
+total_batch_size = 512
+micro_batch_size = 16
 
 optimizer = "AdamW" # "AdamW" or "Adam-mini"
 
 # LR and scheduler
 schedule = "wsd" # "cosine" or "wsd"
 
-lr = 1e-4
-lr_warmup_iters = 1000
+lr = 1.8e-3
+lr_warmup_iters = 200
 
 # cosine schedule specific
 lr_min = 4e-5
 
 # wsd schedule specific
-lr_decay_iters = 20000 # 10-20% of num_iters
+lr_decay_iters = 1640 # 10-20% of num_iters
 
 adam_b1 = 0.9
 adam_b2 = 0.95
@@ -129,8 +130,8 @@ start_iter = 0 # specify starting iter (if loading from ckpt_60000, put 60001)
 # --- logging and eval parameters ---
 log_wandb = True
 
-train_log_interval = 50
-eval_val_interval = 200 # also the printing period
+train_log_interval = 1
+eval_val_interval = 6 # also the printing period
 eval_val_iters = 50
 
 # --- benchmarking parameters ---
@@ -193,7 +194,8 @@ if log_wandb:
                 "training": {
                     "seed": seed-123456789,
                     "num_iters": num_iters,
-                    "batch_size": batch_size,
+                    "total_batch_size": total_batch_size,
+                    "micro_batch_size": micro_batch_size,
                     "optimizer": optimizer,
                     "adam_b1": adam_b1,
                     "adam_b2": adam_b2,
@@ -222,8 +224,10 @@ if not benchmark:
     os.makedirs(save_dir, exist_ok=True)
     print(f"Run name: {run_name}.")
 
-train_loader = DataLoader("data/fineweb10B/fineweb_train_*.bin", batch_size, ctx_len, 1, 1)
-val_loader = DataLoader("data/fineweb10B/fineweb_val_*.bin", batch_size, ctx_len, 1, 1)
+train_loader = DataLoader("data/fineweb10B/fineweb_train_*.bin", micro_batch_size, ctx_len, 1, 1)
+val_loader = DataLoader("data/fineweb10B/fineweb_val_*.bin", micro_batch_size, ctx_len, 1, 1)
+
+grad_acc_steps = total_batch_size // micro_batch_size
 
 # model
 if architecture == "Transformer":
@@ -278,14 +282,19 @@ grads = None
 
 try:
     for iter in range(start_iter, num_iters):
-        x, y = train_loader.next_batch()
-        x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
-        with dtype_ctx:
-            logits = model(x)
-            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
+        loss_total = 0.
+        for micro_step in range(grad_acc_steps):
+            x, y = train_loader.next_batch()
+            x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
-        loss.backward()
+            with dtype_ctx:
+                logits = model(x)
+                loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
+                loss = loss / grad_acc_steps
+                loss_total += loss.detach()
+
+            loss.backward()
 
         if clip_value_grad != 0.0:
             torch.nn.utils.clip_grad_value_(model.parameters(), clip_value=clip_value_grad)
@@ -305,7 +314,7 @@ try:
         # logging : print and wandb
         to_log = {}
         if iter % train_log_interval == 0:
-            to_log.update({"train_loss": loss.item(), "grad_norm": total_grad_norm})
+            to_log.update({"train_loss": loss_total, "grad_norm": total_grad_norm})
 
             curr_time = time.time()
             dt = curr_time - last_time
@@ -351,7 +360,7 @@ try:
         """
 
         if to_log:
-            to_log.update({"lr": lr_iter, "tokens_seen": iter*ctx_len*batch_size})
+            to_log.update({"lr": lr_iter, "tokens_seen": iter*ctx_len*total_batch_size})
 
             # printing
             if "val_loss" in to_log:
@@ -365,7 +374,7 @@ try:
 
                 last_print_time = time.time()
 
-                print(f"Iter {formatted_iter}/{num_iters}. train loss : {loss.item():.3f}. valid loss : {eval_loss:.3f}. lr : {lr_iter:.5f}. uptime : {format_time(uptime)}. ETA : {format_time(eta)}.")
+                print(f"Iter {formatted_iter}/{num_iters}. train loss : {loss_total:.3f}. valid loss : {eval_loss:.3f}. lr : {lr_iter:.5f}. uptime : {format_time(uptime)}. ETA : {format_time(eta)}.")
             
             # logging
             if log_wandb:
@@ -417,7 +426,7 @@ print(f"Successfully saved checkpoint and config in {save_dir}.")
 num_params = sum([p.numel() for p in model.parameters()])
 
 to_log = {"num_params": num_params, "num_iters": iter,
-          "num_tokens": iter*batch_size*ctx_len,
+          "num_tokens": iter*total_batch_size*ctx_len,
           "use_torch_compile": use_torch_compile, "use_flash_attn": use_flash_attention, "dtype": dtype}
 
 if log_wandb:
