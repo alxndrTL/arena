@@ -117,7 +117,7 @@ adam_b2 = 0.95
 clip_value_grad = 1.0
 weight_decay = 0.1
 
-use_torch_compile = True if architecture == "Transformer" else False # do not toggle if using Mamba
+use_torch_compile = False # do not toggle if using Mamba
 
 device = "cuda" # "cpu", "cuda:0", "cuda:1", ...
 dtype = "bfloat16" # "float32" or "bfloat16"
@@ -131,7 +131,7 @@ ckpt = "" # if you want to restart training from a checkpoint (path/to/model.pth
 start_iter = 0 # specify starting iter (if loading from ckpt_60000, put 60001)
 
 # --- logging and eval parameters ---
-log_wandb = True
+log_wandb = False
 
 train_log_interval = 1
 eval_val_interval = 6 # also the printing period
@@ -301,6 +301,9 @@ try:
 
             with dtype_ctx:
                 logits = model(x)
+                print(logits.shape)
+                print(logits.view(-1, logits.size(-1)).shape)
+                print(y.view(-1).shape)
                 loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
                 loss = loss / grad_acc_steps
                 loss_total += loss.detach()

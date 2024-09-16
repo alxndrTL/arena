@@ -171,7 +171,7 @@ class CausalSelfAttention(nn.Module):
         q, k, v = qkv.split([self.n_head * self.hd, self.n_kv_head * self.hd, self.n_kv_head * self.hd], dim=-1)
         q, k, v = map(lambda t: t.view(B, T, -1, self.hd), (q, k, v))  # (B, T, NH, HD)
 
-        q, k = apply_rotary_emb(q, k, freqs_cis=freqs_cis)  # rotate QK (rope)  <-- 1. difference compared to GPT-2
+        q, k = apply_rotary_emb(q, k, freqs_cis=freqs_cis.to(q.device))  # rotate QK (rope)  <-- 1. difference compared to GPT-2
 
         if self.use_kv and not self.training and start_pos >= 0:  # use kv-caching during inference
             self.cache_k[:B, start_pos : start_pos + T] = k
@@ -307,14 +307,9 @@ class LLaMA(nn.Module):
             x = block(x, freqs_cis, start_pos, mask)
         x = self.transformer.ln_f(x)
 
-        if targets is not None:
-            # if we are given some desired targets also calculate the loss
-            logits = self.lm_head(x).float()
-            #loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1)
-        else:
-            # inference-time mini-optimization: only forward the lm_head on the very last position
-            logits = self.lm_head(x[:, [-1], :]).float() # note: using list [-1] to preserve the time dim
-            #loss = None
+        # if we are given some desired targets also calculate the loss
+        logits = self.lm_head(x).float()
+        #loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1)
 
         # there are performance reasons why not returning logits is prudent, if not needed
         #if not return_logits:

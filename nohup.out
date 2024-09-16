@@ -1,0 +1,18 @@
+Run name: PCITZMzt.
+DataLoader: total number of tokens: 10,255,324,043 across 103 files
+DataLoader: total number of tokens: 100,000,000 across 1 files
+num decayed parameter tensors: 62, with 303,687,168 parameters
+num non-decayed parameter tensors: 25, with 19,200 parameters
+using fused AdamW: True
+using regular AdamW
+Model initialized. Number of parameters : 303706368.
+Training is starting.
+torch.Size([16, 1, 50257])
+torch.Size([16, 50257])
+torch.Size([16384])
+Traceback (most recent call last):
+  File "/workspace/arena/train.py", line 307, in <module>
+    loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/functional.py", line 3059, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(input, target, weight, _Reduction.get_enum(reduction), ignore_index, label_smoothing)
+ValueError: Expected input batch_size (16) to match target batch_size (16384).
