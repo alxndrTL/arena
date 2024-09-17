@@ -54,3 +54,8 @@ Iter 2368/8200. train loss : 6.909. valid loss : 6.826. lr : 0.00180. uptime : 0
 Iter 2432/8200. train loss : 6.989. valid loss : 6.819. lr : 0.00180. uptime : 00h09min. ETA : 00h19min.
 Iter 2496/8200. train loss : 6.950. valid loss : 6.821. lr : 0.00180. uptime : 00h09min. ETA : 00h19min.
 Iter 2560/8200. train loss : 6.487. valid loss : 6.748. lr : 0.00180. uptime : 00h09min. ETA : 00h19min.
+Iter 2624/8200. train loss : 7.088. valid loss : 6.847. lr : 0.00180. uptime : 00h09min. ETA : 00h18min.
+Iter 2688/8200. train loss : 6.558. valid loss : 6.793. lr : 0.00180. uptime : 00h10min. ETA : 00h18min.
+Iter 2752/8200. train loss : 6.645. valid loss : 6.839. lr : 0.00180. uptime : 00h10min. ETA : 00h18min.
+Iter 2816/8200. train loss : 7.029. valid loss : 6.838. lr : 0.00180. uptime : 00h10min. ETA : 00h18min.
+Iter 2880/8200. train loss : 6.993. valid loss : 6.876. lr : 0.00180. uptime : 00h10min. ETA : 00h17min.
