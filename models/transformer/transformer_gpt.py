@@ -1,178 +1,249 @@
 import math
-
-import inspect
 from dataclasses import dataclass
+from typing import Optional
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class NewGELU(nn.Module):
-    """Careful there are a few versions of GeLU, this one is the exact one used by OpenAI"""
-    def forward(self, input):
-        return 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
+from models.transformer.rotary_embedding import RotaryEmbedding
 
-# using a global to toggle flash-attention
-FLASH = 1
+"""
+caching is WIP
+"""
 
-class CausalSelfAttention(nn.Module):
+#todo : mettre des optional la ou on peut
+@dataclass
+class TransformerGPTConfig:
+    d_model: int # D or d_model in comments
+    n_layers: int
+    n_heads: int
+    max_len: int # maximum sequence length (for positional embedding, super attn and mask if no FA)
+    dropout: float = 0.
+    bias: bool = False
+    norm_eps: float = 1e-5
+    base_std: float = 0.02
+    
+    optimised_attn: bool = False
+    efficient_attn: bool = False
+    super_attn: bool = False # overwrites flash to False
 
-    def __init__(self, config):
+    pos_emb: str = "absolute" # absolute, rope
+    rope_theta: float = 10000
+
+    mup: bool = False
+    mup_base_width: float = 128 # width=d_model
+
+    flash: bool = True
+
+    def __post_init__(self):
+        assert self.d_model % self.n_heads == 0, "d_model must be a multiple of n_heads"
+        self.d_head = self.d_model // self.n_heads
+
+        # eff/opt/super attn
+        self.optimised_attn = self.optimised_attn or self.efficient_attn or self.super_attn
+        self.efficient_attn = self.efficient_attn or self.super_attn
+
+        # muP
+        if self.mup:
+            self.mup_width_mult = self.d_model / self.mup_base_width
+            self.mup_attn_mult = math.sqrt(self.d_head) # base_d_head=d_head (kept constant)
+
+class Transformer(nn.Module):
+    def __init__(self, config: TransformerGPTConfig):
         super().__init__()
-        assert config.n_embd % config.n_head == 0
-        # key, query, value projections for all heads, but in a batch
-        self.c_attn = nn.Linear(config.n_embd, 3 * config.n_embd)
-        # output projection
-        self.c_proj = nn.Linear(config.n_embd, config.n_embd)
-        self.c_proj.LLMC_RESIDUAL_SCALE_FLAG = 1
-        # regularization
-        self.n_head = config.n_head
-        self.n_embd = config.n_embd
-        # not really a 'bias', more of a mask, but following the OpenAI/HF naming though
-        self.register_buffer("bias", torch.tril(torch.ones(config.block_size, config.block_size))
-                                     .view(1, 1, config.block_size, config.block_size))
 
-    def forward(self, x):
-        B, T, C = x.size() # batch size, sequence length, embedding dimensionality (n_embd)
-        # calculate query, key, values for all heads in batch and move head forward to be the batch dim
-        qkv = self.c_attn(x)
-        q, k, v = qkv.split(self.n_embd, dim=2)
-        k = k.view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, nh, T, hs)
-        q = q.view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, nh, T, hs)
-        v = v.view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, nh, T, hs)
-        if FLASH:
-            # flashattention
-            y = F.scaled_dot_product_attention(q, k, v, is_causal=True)
+        self.config = config
+
+        if self.config.pos_emb == "absolute":
+            self.PE = nn.Embedding(config.max_len, config.d_model)
+            self.layers = nn.ModuleList([DecoderLayer(config) for _ in range(config.n_layers)])
+
+        elif self.config.pos_emb == "rope":
+            PE = RotaryEmbedding(dim=(self.config.d_model//self.config.n_heads)//2, theta=self.config.rope_theta)
+            self.layers = nn.ModuleList([DecoderLayer(config, PE) for _ in range(config.n_layers)])
+
         else:
-            # manual implementation of attention
-            # this materializes the large (T,T) matrix for all the queries and keys
-            att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
-            att = att.masked_fill(self.bias[:,:,:T,:T] == 0, float('-inf'))
-            att = F.softmax(att, dim=-1)
-            y = att @ v # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
-        y = y.transpose(1, 2).contiguous().view(B, T, C) # re-assemble all head outputs side by side
-        # output projection
-        y = self.c_proj(y)
-        return y
+            raise NotImplementedError
+        
+        self.in_dropout = nn.Dropout(config.dropout)
 
-class MLP(nn.Module):
+    def forward(self, X, caches=None, seq_pos=0):
+        # X : (B, L, D)
 
-    def __init__(self, config):
+        # Y : (B, L, D)
+
+        _, T, _ = X.size()
+
+        if self.config.pos_emb == "absolute":
+            pos_emb = self.PE(torch.arange(seq_pos, seq_pos+T, dtype=torch.long, device=X.device))
+            X = self.in_dropout(X + pos_emb)
+        else:
+            X = self.in_dropout(X)
+
+        for i, layer in enumerate(self.layers):
+            X, c = layer(X, caches[i] if caches is not None else None) # (B, L, d_model)
+
+            if caches is not None:
+                caches[i] = c
+        
+        if caches is None:
+            return X
+        else:
+            return X, caches
+    
+class DecoderLayer(nn.Module):
+    def __init__(self, config: TransformerGPTConfig, rotary_emb: RotaryEmbedding = None):
         super().__init__()
-        self.c_fc    = nn.Linear(config.n_embd, 4 * config.n_embd)
-        self.gelu    = NewGELU()
-        self.c_proj  = nn.Linear(4 * config.n_embd, config.n_embd)
-        self.c_proj.LLMC_RESIDUAL_SCALE_FLAG = 1
+
+        self.config = config
+
+        self.attention_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
+        self.sa = SelfAttentionMultiHead(config, rotary_emb)
+        self.mlp_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
+        self.mlp = MLP(config)
+        
+    def forward(self, X, cache=None):
+        # X : (B, L, D)
+
+        # Y : (B, L, D)
+
+        residual = X
+        X, cache = self.sa(self.attention_norm(X), cache)
+        X = residual + X
+        X = X + self.mlp(self.mlp_norm(X))
+
+        return X, cache
+    
+    def get_empty_cache(self, batch_size):
+        return (None, None)
+    
+class MLP(nn.Module):
+    def __init__(self, config: TransformerGPTConfig):
+        super().__init__()
+        self.c_fc    = nn.Linear(config.d_model, 4 * config.d_model, bias=False)
+        self.c_proj  = nn.Linear(4 * config.d_model, config.d_model, bias=False)
 
     def forward(self, x):
         x = self.c_fc(x)
-        x = self.gelu(x)
+        x = F.gelu(x)
         x = self.c_proj(x)
         return x
 
-class Block(nn.Module):
-
-    def __init__(self, config):
+class SelfAttentionMultiHead(nn.Module):
+    def __init__(self, config: TransformerGPTConfig, rotary_emb: RotaryEmbedding = None):
         super().__init__()
-        self.ln_1 = nn.LayerNorm(config.n_embd)
-        self.attn = CausalSelfAttention(config)
-        self.ln_2 = nn.LayerNorm(config.n_embd)
-        self.mlp = MLP(config)
 
-    def forward(self, x):
-        x = x + self.attn(self.ln_1(x))
-        x = x + self.mlp(self.ln_2(x))
-        return x
-
-# -----------------------------------------------------------------------------
-# The main GPT-2 model
-
-@dataclass
-class TransformerGPTConfig:
-    block_size: int = 1024
-    vocab_size: int = 50257
-    n_layer: int = 12
-    n_head: int = 12
-    n_embd: int = 768
-
-class GPT(nn.Module):
-    def __init__(self, config):
-        super().__init__()
         self.config = config
 
-        self.transformer = nn.ModuleDict(dict(
-            wte = nn.Embedding(config.vocab_size, config.n_embd),
-            wpe = nn.Embedding(config.block_size, config.n_embd),
-            h = nn.ModuleList([Block(config) for _ in range(config.n_layer)]),
-            ln_f = nn.LayerNorm(config.n_embd),
-        ))
-        self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
-        self.lm_head.LLMC_SKIP_INIT = 1 # don't init this one, we will tie weights
-        self.transformer.wte.weight = self.lm_head.weight # https://paperswithcode.com/method/weight-tying
+        # key, query, value projections for all heads
+        self.query_proj = nn.Linear(config.d_model, config.n_heads * config.d_head, bias=False) # d_query = n_heads*d_head = d_model as in the Transformer paper
 
-        # init all weights, use a torch rng object to be very careful
-        self.init_rng = torch.Generator()
-        self.init_rng.manual_seed(42)
-        self.apply(self._init_weights)
+        if not self.config.efficient_attn:
+            self.key_proj = nn.Linear(config.d_model, config.n_heads * config.d_head, bias=False)
 
-    def _init_weights(self, module):
-        if isinstance(module, nn.Linear):
-            # apply special scaled init to the residual projections, per GPT-2 paper
-            std = 0.02 if not hasattr(module, 'LLMC_RESIDUAL_SCALE_FLAG') else 0.02/math.sqrt(2 * self.config.n_layer)
-            # we want to skip initializing lm_head, which shares parameters with wte
-            # and wte was already initialized down below during the Embedding init
-            if not hasattr(module, 'LLMC_SKIP_INIT'):
-                torch.nn.init.normal_(module.weight, mean=0.0, std=std, generator=self.init_rng)
-            if module.bias is not None:
-                torch.nn.init.zeros_(module.bias)
-        elif isinstance(module, nn.Embedding):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02, generator=self.init_rng)
+        if not self.config.optimised_attn:
+            self.value_proj = nn.Linear(config.d_model, config.n_heads * config.d_head, bias=False)
 
-    def forward(self, idx, targets=None, return_logits=True):
-        device = idx.device
-        b, t = idx.size()
-        assert t <= self.config.block_size, f"Cannot forward sequence of length {t}, block size is only {self.config.block_size}"
-        pos = torch.arange(0, t, dtype=torch.long, device=device) # shape (t)
+        # LxL super attention matrix params
+        if config.super_attn:
+            self.k_in_v_proj = nn.Linear(config.max_len, config.max_len, bias=False)
 
-        # forward the GPT model itself
-        tok_emb = self.transformer.wte(idx) # token embeddings of shape (b, t, n_embd)
-        pos_emb = self.transformer.wpe(pos) # position embeddings of shape (t, n_embd)
-        x = tok_emb + pos_emb
+        # RoPE embedding
+        self.rotary_emb = rotary_emb
 
-        for block in self.transformer.h:
-            x = block(x)
-        x = self.transformer.ln_f(x)
+        if not config.flash or config.super_attn:
+            # compute the mask once and for all here 
+            # registrer treats it like a parameter (device, state_dict...) without training
+            mask = torch.full((1, 1, config.max_len, config.max_len), float('-inf'))
+            mask = torch.triu(mask, diagonal=1)
+            self.register_buffer('mask', mask)
 
-        if targets is not None:
-            # if we are given some desired targets also calculate the loss
-            logits = self.lm_head(x)
+        # output projection
+        self.c_proj = nn.Linear(config.d_model, config.d_model, bias=config.bias)
+
+        # regularization
+        self.attn_drop = nn.Dropout(config.dropout)
+        self.resid_dropout = nn.Dropout(config.dropout)
+
+    def forward(self, X, cache=None):
+        # X : (B, L, d_model)
+
+        B, L, _ = X.size()
+
+        # Q,K,V projections
+        Q = self.query_proj(X).view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_query)
+
+        if not self.config.efficient_attn:
+            K = self.key_proj(X).view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_kv_heads, L, d_key)
         else:
-            # inference-time mini-optimization: only forward the lm_head on the very last position
-            logits = self.lm_head(x[:, [-1], :]) # note: using list [-1] to preserve the time dim
+            K = X.view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_kv_heads, L, d_key)
 
-        return logits
+        if not self.config.optimised_attn:
+            V = self.value_proj(X).view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_head=d_value)
+        else:
+            V = X.view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_head=d_value)
 
-    def configure_optimizers(self, weight_decay, learning_rate, betas, device_type, zero_stage):
-        # start with all of the candidate parameters
-        param_dict = {pn: p for pn, p in self.named_parameters()}
-        # filter out those that do not require grad
-        param_dict = {pn: p for pn, p in param_dict.items() if p.requires_grad}
-        # create optim groups. Any parameters that is 2D will be weight decayed, otherwise no.
-        # i.e. all weight tensors in matmuls + embeddings decay, all biases and layernorms don't.
-        decay_params = [p for n, p in param_dict.items() if p.dim() >= 2]
-        nodecay_params = [p for n, p in param_dict.items() if p.dim() < 2]
-        optim_groups = [
-            {'params': decay_params, 'weight_decay': weight_decay},
-            {'params': nodecay_params, 'weight_decay': 0.0}
-        ]
-        num_decay_params = sum(p.numel() for p in decay_params)
-        num_nodecay_params = sum(p.numel() for p in nodecay_params)
-        print(f"num decayed parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters")
-        print(f"num non-decayed parameter tensors: {len(nodecay_params)}, with {num_nodecay_params:,} parameters")
-        # Create AdamW optimizer and use the fused version if it is available
-        fused_available = 'fused' in inspect.signature(torch.optim.AdamW).parameters
-        use_fused = fused_available and device_type == 'cuda'
-        print(f"using fused AdamW: {use_fused}")
-        print("using regular AdamW")
-        optimizer = torch.optim.AdamW(optim_groups, lr=learning_rate, betas=betas, fused=use_fused)
-        return optimizer
+        # kv cache implementation
+        if cache is not None:
+            past_keys, past_values = cache
+            
+            # not first in the sequence
+            if past_keys is not None:
+                K = torch.cat([past_keys, K], dim=2)
+                V = torch.cat([past_values, V], dim=2)
+            
+            cache = (K, V) # prepare cache for next token
+
+        # RoPE
+        if self.config.pos_emb == "rope" and cache is None:
+            Q = self.rotary_emb.rotate_queries_or_keys(Q)
+            K = self.rotary_emb.rotate_queries_or_keys(K)
+        elif self.config.pos_emb == "rope":
+            Q, K = self.rotary_emb.rotate_queries_with_cached_keys(Q, K)
+
+        # attn computation (torch or manual)
+        scale = self.config.mup_attn_mult/self.config.d_head if self.config.mup else 1/math.sqrt(self.config.d_head)
+
+        if self.config.flash and not self.config.super_attn:
+            attention = F.scaled_dot_product_attention(Q, K, V, attn_mask=None, dropout_p=self.config.dropout if self.training else 0, is_causal=not(L==1), scale=scale)
+        else:
+            QK_T = Q @ torch.transpose(K, 2, 3) # (B, n_heads, L, L)
+            QK_T = QK_T + self.mask[:, :, :L, :L]
+
+            attention_scores = torch.softmax(scale * QK_T, dim=3) # (B, n_heads, L, L)
+
+            if self.config.super_attn:
+                assert L == self.config.max_len, "Super Attention only currently supports a seq len of max_len"
+                attention = self.attn_drop(attention_scores) @ self.k_in_v_proj.weight[:L, :L] @ V # (B, n_h, L, d_value=d_head)
+            else:
+                attention = self.attn_drop(attention_scores) @ V # (B, n_h, L, d_value=d_head)
+
+        attention = attention.transpose(1, 2) # (B, L, n_heafs, d_head)
+        y = attention.contiguous().view(B, L, self.config.d_model) # n_heads * d_head = d_model
+
+        y = self.resid_dropout(self.c_proj(y))
+
+        return y, cache
+
+class RMSNorm(nn.Module):
+    def __init__(self, dim: int, eps: float, use_mup: bool):
+        super().__init__()
+
+        self.use_mup = use_mup
+        self.eps = eps
+
+        # https://arxiv.org/abs/2404.05728, RMSNorm gains prevents muTransfer (section 4.2.3)
+        if not use_mup:
+            self.weight = nn.Parameter(torch.ones(dim))
+
+    def _norm(self, x):
+        return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
+
+    def forward(self, x):
+        output = self._norm(x.float()).type_as(x)
+
+        if not self.use_mup:
+            return output * self.weight
+        else:
+            return output

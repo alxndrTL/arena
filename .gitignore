@@ -2,3 +2,5 @@ __pycache__/
 runs/
 wandb/
 data/fineweb10B
+pylog124M/
+logs/

@@ -36,12 +36,10 @@ import torch.optim.lr_scheduler as lr_scheduler
 from utils.lr_schedules import cosine_warmup_schedule, wsd_schedule
 
 from models.lm import LM
-from models.transformer.transformer import TransformerConfig
+#from models.transformer.transformer import TransformerConfig
+from models.transformer.transformer_gpt import TransformerGPTConfig as TransformerConfig
 from models.mamba.mamba import MambaConfig
 from models.mamba.mamba2 import Mamba2Config
-
-from models.transformer.transformer_gpt import TransformerGPTConfig, GPT
-from models.transformer.transformer_llama import TransformerLlamaConfig, LLaMA
 
 from data.dataloader import DataLoader
 
@@ -74,7 +72,7 @@ d_head = 64
 d_state = 128
 
 # Transformer specific
-d_ff = 2688
+d_ff = 2048
 n_heads = 12
 n_kv_heads = n_heads # n_heads is MHA, 1 is MQA (multi query attention), in between is GQA (grouped query attention)
 dropout = 0.
@@ -94,13 +92,13 @@ mup_base_width = 288
 
 # --- training parameters ---
 num_iters = 8200
-total_batch_size = 512
+total_batch_size = 16
 micro_batch_size = 16
 
 optimizer = "AdamW" # "AdamW" or "Adam-mini"
 
 # LR and scheduler
-schedule = "cosine" # "cosine" or "wsd"
+schedule = "wsd" # "cosine" or "wsd"
 
 lr = 1.8e-3
 lr_warmup_iters = 200
@@ -131,10 +129,10 @@ ckpt = "" # if you want to restart training from a checkpoint (path/to/model.pth
 start_iter = 0 # specify starting iter (if loading from ckpt_60000, put 60001)
 
 # --- logging and eval parameters ---
-log_wandb = False
+log_wandb = True
 
 train_log_interval = 1
-eval_val_interval = 6 # also the printing period
+eval_val_interval = 64 # also the printing period
 eval_val_iters = 50
 
 # --- benchmarking parameters ---
@@ -233,30 +231,24 @@ val_loader = DataLoader("data/fineweb10B/fineweb_val_*.bin", micro_batch_size, c
 grad_acc_steps = total_batch_size // micro_batch_size
 
 # model
-"""
+
 if architecture == "Transformer":
-    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
+    #config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
+    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
 elif architecture == "Mamba":
     config = MambaConfig(d_model=d_model, n_layers=n_layers, bias=bias, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, use_cuda=use_cuda)
 elif architecture == "Mamba2":
     config = Mamba2Config(d_model=d_model, n_layers=n_layers, d_state=d_state, d_head=d_head, n_groups=1, max_len=ctx_len, bias=bias, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width)
 else:
     raise NotImplementedError
-"""
 
 g = torch.Generator()
 g.manual_seed(seed)
 
-"""
 model = LM(config, vocab_size=vocab_size, rng=g).to(device)
-"""
-
-config = TransformerLlamaConfig(block_size=ctx_len, vocab_size=vocab_size, n_layer=n_layers, n_head=n_heads, n_kv_head=n_kv_heads, n_embd=d_model,
-                                multiple_of=1, ffn_dim_multiplier=1.3, rope_theta=rope_theta, use_scaled_rop=False, flash=True)
-model = LLaMA(config).to(device)
 
 if optimizer == "AdamW":
-    optim = model.configure_optimizers(weight_decay, lr, (adam_b1, adam_b2), device_type, 0)
+    optim = model.configure_optimizers(weight_decay, lr, (adam_b1, adam_b2), device_type)
 elif optimizer == "Adam-mini": # todo : mup
     raise NotImplementedError
 else:
@@ -288,8 +280,6 @@ last_time = start_time
 last_print_time = start_time
 
 torch.cuda.reset_peak_memory_stats(device=None)
-
-grads = None
 
 try:
     for iter in range(start_iter, num_iters):
