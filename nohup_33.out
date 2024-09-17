@@ -1,0 +1,299 @@
+wandb: Using wandb-core as the SDK backend. Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: alexandretl. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.18.1
+wandb: Run data is saved locally in /workspace/arena/wandb/run-20240917_133336-hgg5x1jz
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run glowing-violet-33
+wandb: ⭐️ View project at https://wandb.ai/alexandretl/arena
+wandb: 🚀 View run at https://wandb.ai/alexandretl/arena/runs/hgg5x1jz
+Run name: glowing-violet-33.
+DataLoader: total number of tokens: 10,255,324,043 across 103 files
+DataLoader: total number of tokens: 100,000,000 across 1 files
+Model initialized. Number of parameters : 123551232.
+Compiling the model...
+Done compiling.
+Training is starting.
+Iter 00000/16000. train loss : 10.979. valid loss : 10.978. lr : 0.00001. uptime : 00h00min. ETA : 01h32min.
+Iter 00064/16000. train loss : 7.650. valid loss : 7.778. lr : 0.00059. uptime : 00h00min. ETA : 01h05min.
+Iter 00128/16000. train loss : 7.530. valid loss : 7.314. lr : 0.00116. uptime : 00h00min. ETA : 00h57min.
+Iter 00192/16000. train loss : 7.559. valid loss : 7.524. lr : 0.00174. uptime : 00h01min. ETA : 00h57min.
+Iter 00256/16000. train loss : 6.960. valid loss : 7.093. lr : 0.00180. uptime : 00h01min. ETA : 00h57min.
+Iter 00320/16000. train loss : 6.817. valid loss : 6.881. lr : 0.00180. uptime : 00h01min. ETA : 00h57min.
+Iter 00384/16000. train loss : 6.590. valid loss : 6.646. lr : 0.00180. uptime : 00h01min. ETA : 00h56min.
+Iter 00448/16000. train loss : 6.514. valid loss : 6.546. lr : 0.00180. uptime : 00h02min. ETA : 00h56min.
+Iter 00512/16000. train loss : 6.872. valid loss : 6.551. lr : 0.00180. uptime : 00h02min. ETA : 00h56min.
+Iter 00576/16000. train loss : 6.770. valid loss : 6.504. lr : 0.00180. uptime : 00h02min. ETA : 00h56min.
+Iter 00640/16000. train loss : 6.615. valid loss : 6.372. lr : 0.00180. uptime : 00h02min. ETA : 00h56min.
+Iter 00704/16000. train loss : 6.315. valid loss : 6.402. lr : 0.00180. uptime : 00h02min. ETA : 00h55min.
+Iter 00768/16000. train loss : 6.452. valid loss : 6.280. lr : 0.00180. uptime : 00h03min. ETA : 00h55min.
+Iter 00832/16000. train loss : 6.233. valid loss : 6.284. lr : 0.00180. uptime : 00h03min. ETA : 00h55min.
+Iter 00896/16000. train loss : 6.310. valid loss : 6.225. lr : 0.00180. uptime : 00h03min. ETA : 00h55min.
+Iter 00960/16000. train loss : 5.990. valid loss : 6.221. lr : 0.00180. uptime : 00h03min. ETA : 00h54min.
+Iter 01024/16000. train loss : 6.121. valid loss : 6.211. lr : 0.00180. uptime : 00h04min. ETA : 01h01min.
+Iter 01088/16000. train loss : 6.205. valid loss : 6.200. lr : 0.00180. uptime : 00h04min. ETA : 00h54min.
+Iter 01152/16000. train loss : 6.393. valid loss : 6.176. lr : 0.00180. uptime : 00h04min. ETA : 00h54min.
+Iter 01216/16000. train loss : 5.913. valid loss : 6.099. lr : 0.00180. uptime : 00h04min. ETA : 00h53min.
+Iter 01280/16000. train loss : 6.086. valid loss : 6.081. lr : 0.00180. uptime : 00h05min. ETA : 00h53min.
+Iter 01344/16000. train loss : 6.160. valid loss : 6.123. lr : 0.00180. uptime : 00h05min. ETA : 00h53min.
+Iter 01408/16000. train loss : 5.873. valid loss : 6.107. lr : 0.00180. uptime : 00h05min. ETA : 00h53min.
+Iter 01472/16000. train loss : 5.810. valid loss : 6.085. lr : 0.00180. uptime : 00h05min. ETA : 00h53min.
+Iter 01536/16000. train loss : 5.875. valid loss : 6.142. lr : 0.00180. uptime : 00h06min. ETA : 00h52min.
+Iter 01600/16000. train loss : 5.890. valid loss : 6.062. lr : 0.00180. uptime : 00h06min. ETA : 00h52min.
+Iter 01664/16000. train loss : 5.911. valid loss : 6.080. lr : 0.00180. uptime : 00h06min. ETA : 00h52min.
+Iter 01728/16000. train loss : 6.356. valid loss : 6.070. lr : 0.00180. uptime : 00h06min. ETA : 00h52min.
+Iter 01792/16000. train loss : 5.632. valid loss : 6.121. lr : 0.00180. uptime : 00h07min. ETA : 00h51min.
+Iter 01856/16000. train loss : 5.946. valid loss : 6.000. lr : 0.00180. uptime : 00h07min. ETA : 00h51min.
+Iter 01920/16000. train loss : 5.785. valid loss : 6.022. lr : 0.00180. uptime : 00h07min. ETA : 00h51min.
+Iter 01984/16000. train loss : 5.873. valid loss : 6.012. lr : 0.00180. uptime : 00h07min. ETA : 00h51min.
+Iter 02048/16000. train loss : 5.877. valid loss : 6.065. lr : 0.00180. uptime : 00h07min. ETA : 00h57min.
+Iter 02112/16000. train loss : 5.751. valid loss : 5.960. lr : 0.00180. uptime : 00h08min. ETA : 00h50min.
+Iter 02176/16000. train loss : 5.755. valid loss : 5.992. lr : 0.00180. uptime : 00h08min. ETA : 00h50min.
+Iter 02240/16000. train loss : 5.879. valid loss : 5.963. lr : 0.00180. uptime : 00h08min. ETA : 00h50min.
+Iter 02304/16000. train loss : 6.015. valid loss : 5.995. lr : 0.00180. uptime : 00h08min. ETA : 00h49min.
+Iter 02368/16000. train loss : 6.077. valid loss : 6.009. lr : 0.00180. uptime : 00h09min. ETA : 00h49min.
+Iter 02432/16000. train loss : 6.125. valid loss : 5.987. lr : 0.00180. uptime : 00h09min. ETA : 00h49min.
+Iter 02496/16000. train loss : 6.171. valid loss : 6.000. lr : 0.00180. uptime : 00h09min. ETA : 00h49min.
+Iter 02560/16000. train loss : 5.746. valid loss : 5.974. lr : 0.00180. uptime : 00h09min. ETA : 00h49min.
+Iter 02624/16000. train loss : 6.114. valid loss : 5.986. lr : 0.00180. uptime : 00h10min. ETA : 00h48min.
+Iter 02688/16000. train loss : 5.856. valid loss : 6.022. lr : 0.00180. uptime : 00h10min. ETA : 00h48min.
+Iter 02752/16000. train loss : 5.837. valid loss : 6.019. lr : 0.00180. uptime : 00h10min. ETA : 00h48min.
+Iter 02816/16000. train loss : 6.081. valid loss : 5.872. lr : 0.00180. uptime : 00h10min. ETA : 00h48min.
+Iter 02880/16000. train loss : 6.035. valid loss : 5.912. lr : 0.00180. uptime : 00h11min. ETA : 00h47min.
+Iter 02944/16000. train loss : 5.869. valid loss : 5.867. lr : 0.00180. uptime : 00h11min. ETA : 00h47min.
+Iter 03008/16000. train loss : 5.783. valid loss : 5.904. lr : 0.00180. uptime : 00h11min. ETA : 00h54min.
+Iter 03072/16000. train loss : 6.185. valid loss : 5.907. lr : 0.00180. uptime : 00h11min. ETA : 00h47min.
+Iter 03136/16000. train loss : 5.970. valid loss : 5.916. lr : 0.00180. uptime : 00h12min. ETA : 00h46min.
+Iter 03200/16000. train loss : 6.183. valid loss : 5.926. lr : 0.00180. uptime : 00h12min. ETA : 00h46min.
+Iter 03264/16000. train loss : 5.784. valid loss : 5.904. lr : 0.00180. uptime : 00h12min. ETA : 00h46min.
+Iter 03328/16000. train loss : 5.974. valid loss : 5.924. lr : 0.00180. uptime : 00h12min. ETA : 00h46min.
+Iter 03392/16000. train loss : 5.738. valid loss : 5.932. lr : 0.00180. uptime : 00h12min. ETA : 00h45min.
+Iter 03456/16000. train loss : 6.045. valid loss : 5.908. lr : 0.00180. uptime : 00h13min. ETA : 00h45min.
+Iter 03520/16000. train loss : 5.784. valid loss : 5.918. lr : 0.00180. uptime : 00h13min. ETA : 00h45min.
+Iter 03584/16000. train loss : 5.930. valid loss : 5.896. lr : 0.00180. uptime : 00h13min. ETA : 00h45min.
+Iter 03648/16000. train loss : 6.049. valid loss : 5.908. lr : 0.00180. uptime : 00h13min. ETA : 00h44min.
+Iter 03712/16000. train loss : 5.874. valid loss : 5.900. lr : 0.00180. uptime : 00h14min. ETA : 00h44min.
+Iter 03776/16000. train loss : 5.839. valid loss : 5.828. lr : 0.00180. uptime : 00h14min. ETA : 00h44min.
+Iter 03840/16000. train loss : 5.534. valid loss : 5.883. lr : 0.00180. uptime : 00h14min. ETA : 00h44min.
+Iter 03904/16000. train loss : 5.643. valid loss : 5.868. lr : 0.00180. uptime : 00h14min. ETA : 00h44min.
+Iter 03968/16000. train loss : 5.959. valid loss : 5.924. lr : 0.00180. uptime : 00h15min. ETA : 00h43min.
+Iter 04032/16000. train loss : 6.025. valid loss : 5.863. lr : 0.00180. uptime : 00h15min. ETA : 00h50min.
+Iter 04096/16000. train loss : 6.671. valid loss : 5.845. lr : 0.00180. uptime : 00h15min. ETA : 00h43min.
+Iter 04160/16000. train loss : 5.843. valid loss : 5.867. lr : 0.00180. uptime : 00h15min. ETA : 00h43min.
+Iter 04224/16000. train loss : 5.829. valid loss : 5.874. lr : 0.00180. uptime : 00h16min. ETA : 00h42min.
+Iter 04288/16000. train loss : 6.103. valid loss : 5.873. lr : 0.00180. uptime : 00h16min. ETA : 00h42min.
+Iter 04352/16000. train loss : 5.833. valid loss : 5.835. lr : 0.00180. uptime : 00h16min. ETA : 00h42min.
+Iter 04416/16000. train loss : 5.853. valid loss : 5.979. lr : 0.00180. uptime : 00h16min. ETA : 00h42min.
+Iter 04480/16000. train loss : 5.981. valid loss : 5.864. lr : 0.00180. uptime : 00h16min. ETA : 00h41min.
+Iter 04544/16000. train loss : 5.851. valid loss : 5.870. lr : 0.00180. uptime : 00h17min. ETA : 00h41min.
+Iter 04608/16000. train loss : 5.743. valid loss : 5.825. lr : 0.00180. uptime : 00h17min. ETA : 00h41min.
+Iter 04672/16000. train loss : 5.805. valid loss : 5.849. lr : 0.00180. uptime : 00h17min. ETA : 00h41min.
+Iter 04736/16000. train loss : 6.201. valid loss : 5.882. lr : 0.00180. uptime : 00h17min. ETA : 00h40min.
+Iter 04800/16000. train loss : 5.991. valid loss : 5.914. lr : 0.00180. uptime : 00h18min. ETA : 00h40min.
+Iter 04864/16000. train loss : 5.733. valid loss : 5.861. lr : 0.00180. uptime : 00h18min. ETA : 00h40min.
+Iter 04928/16000. train loss : 5.688. valid loss : 5.819. lr : 0.00180. uptime : 00h18min. ETA : 00h40min.
+Iter 04992/16000. train loss : 5.696. valid loss : 5.809. lr : 0.00180. uptime : 00h18min. ETA : 00h40min.
+Iter 05056/16000. train loss : 5.800. valid loss : 5.892. lr : 0.00180. uptime : 00h19min. ETA : 00h45min.
+Iter 05120/16000. train loss : 5.831. valid loss : 5.873. lr : 0.00180. uptime : 00h19min. ETA : 00h39min.
+Iter 05184/16000. train loss : 5.812. valid loss : 5.817. lr : 0.00180. uptime : 00h19min. ETA : 00h39min.
+Iter 05248/16000. train loss : 5.822. valid loss : 5.833. lr : 0.00180. uptime : 00h19min. ETA : 00h39min.
+Iter 05312/16000. train loss : 5.724. valid loss : 5.857. lr : 0.00180. uptime : 00h20min. ETA : 00h38min.
+Iter 05376/16000. train loss : 5.702. valid loss : 5.847. lr : 0.00180. uptime : 00h20min. ETA : 00h38min.
+Iter 05440/16000. train loss : 5.721. valid loss : 5.625. lr : 0.00180. uptime : 00h20min. ETA : 00h38min.
+Iter 05504/16000. train loss : 5.964. valid loss : 5.844. lr : 0.00180. uptime : 00h20min. ETA : 00h38min.
+Iter 05568/16000. train loss : 5.901. valid loss : 5.874. lr : 0.00180. uptime : 00h21min. ETA : 00h37min.
+Iter 05632/16000. train loss : 5.723. valid loss : 5.865. lr : 0.00180. uptime : 00h21min. ETA : 00h37min.
+Iter 05696/16000. train loss : 5.772. valid loss : 5.842. lr : 0.00180. uptime : 00h21min. ETA : 00h37min.
+Iter 05760/16000. train loss : 5.905. valid loss : 5.789. lr : 0.00180. uptime : 00h21min. ETA : 00h37min.
+Iter 05824/16000. train loss : 5.840. valid loss : 5.853. lr : 0.00180. uptime : 00h21min. ETA : 00h36min.
+Iter 05888/16000. train loss : 5.759. valid loss : 5.863. lr : 0.00180. uptime : 00h22min. ETA : 00h36min.
+Iter 05952/16000. train loss : 5.900. valid loss : 5.831. lr : 0.00180. uptime : 00h22min. ETA : 00h36min.
+Iter 06016/16000. train loss : 5.884. valid loss : 5.821. lr : 0.00180. uptime : 00h22min. ETA : 00h43min.
+Iter 06080/16000. train loss : 5.796. valid loss : 5.823. lr : 0.00180. uptime : 00h22min. ETA : 00h35min.
+Iter 06144/16000. train loss : 5.887. valid loss : 5.846. lr : 0.00180. uptime : 00h23min. ETA : 00h36min.
+Iter 06208/16000. train loss : 5.876. valid loss : 5.789. lr : 0.00180. uptime : 00h23min. ETA : 00h35min.
+Iter 06272/16000. train loss : 5.692. valid loss : 5.780. lr : 0.00180. uptime : 00h23min. ETA : 00h35min.
+Iter 06336/16000. train loss : 5.575. valid loss : 5.824. lr : 0.00180. uptime : 00h23min. ETA : 00h35min.
+Iter 06400/16000. train loss : 5.684. valid loss : 5.816. lr : 0.00180. uptime : 00h24min. ETA : 00h34min.
+Iter 06464/16000. train loss : 6.003. valid loss : 5.820. lr : 0.00180. uptime : 00h24min. ETA : 00h34min.
+Iter 06528/16000. train loss : 5.690. valid loss : 5.834. lr : 0.00180. uptime : 00h24min. ETA : 00h34min.
+Iter 06592/16000. train loss : 5.863. valid loss : 5.831. lr : 0.00180. uptime : 00h24min. ETA : 00h34min.
+Iter 06656/16000. train loss : 5.822. valid loss : 5.813. lr : 0.00180. uptime : 00h25min. ETA : 00h33min.
+Iter 06720/16000. train loss : 6.069. valid loss : 5.865. lr : 0.00180. uptime : 00h25min. ETA : 00h33min.
+Iter 06784/16000. train loss : 5.823. valid loss : 5.827. lr : 0.00180. uptime : 00h25min. ETA : 00h33min.
+Iter 06848/16000. train loss : 5.538. valid loss : 5.790. lr : 0.00180. uptime : 00h25min. ETA : 00h33min.
+Iter 06912/16000. train loss : 5.666. valid loss : 5.780. lr : 0.00180. uptime : 00h26min. ETA : 00h32min.
+Iter 06976/16000. train loss : 5.795. valid loss : 5.818. lr : 0.00180. uptime : 00h26min. ETA : 00h32min.
+Iter 07040/16000. train loss : 5.857. valid loss : 5.804. lr : 0.00180. uptime : 00h26min. ETA : 00h38min.
+Iter 07104/16000. train loss : 5.553. valid loss : 5.812. lr : 0.00180. uptime : 00h26min. ETA : 00h32min.
+Iter 07168/16000. train loss : 5.595. valid loss : 5.778. lr : 0.00180. uptime : 00h26min. ETA : 00h31min.
+Iter 07232/16000. train loss : 5.648. valid loss : 5.797. lr : 0.00180. uptime : 00h27min. ETA : 00h31min.
+Iter 07296/16000. train loss : 5.855. valid loss : 5.754. lr : 0.00180. uptime : 00h27min. ETA : 00h31min.
+Iter 07360/16000. train loss : 5.842. valid loss : 5.809. lr : 0.00180. uptime : 00h27min. ETA : 00h31min.
+Iter 07424/16000. train loss : 5.973. valid loss : 5.792. lr : 0.00180. uptime : 00h27min. ETA : 00h31min.
+Iter 07488/16000. train loss : 5.746. valid loss : 5.819. lr : 0.00180. uptime : 00h28min. ETA : 00h30min.
+Iter 07552/16000. train loss : 5.606. valid loss : 5.839. lr : 0.00180. uptime : 00h28min. ETA : 00h30min.
+Iter 07616/16000. train loss : 5.740. valid loss : 5.833. lr : 0.00180. uptime : 00h28min. ETA : 00h30min.
+Iter 07680/16000. train loss : 5.836. valid loss : 5.818. lr : 0.00180. uptime : 00h28min. ETA : 00h30min.
+Iter 07744/16000. train loss : 6.081. valid loss : 5.865. lr : 0.00180. uptime : 00h29min. ETA : 00h29min.
+Iter 07808/16000. train loss : 5.874. valid loss : 5.847. lr : 0.00180. uptime : 00h29min. ETA : 00h31min.
+Iter 07872/16000. train loss : 5.676. valid loss : 5.822. lr : 0.00180. uptime : 00h29min. ETA : 00h29min.
+Iter 07936/16000. train loss : 5.742. valid loss : 5.762. lr : 0.00180. uptime : 00h29min. ETA : 00h29min.
+Iter 08000/16000. train loss : 5.741. valid loss : 5.786. lr : 0.00180. uptime : 00h30min. ETA : 00h28min.
+Iter 08064/16000. train loss : 5.927. valid loss : 5.761. lr : 0.00180. uptime : 00h30min. ETA : 00h36min.
+Iter 08128/16000. train loss : 5.877. valid loss : 5.842. lr : 0.00180. uptime : 00h30min. ETA : 00h28min.
+Iter 08192/16000. train loss : 5.869. valid loss : 5.782. lr : 0.00180. uptime : 00h30min. ETA : 00h28min.
+Iter 08256/16000. train loss : 5.703. valid loss : 5.757. lr : 0.00180. uptime : 00h31min. ETA : 00h27min.
+Iter 08320/16000. train loss : 5.771. valid loss : 5.803. lr : 0.00180. uptime : 00h31min. ETA : 00h27min.
+Iter 08384/16000. train loss : 6.113. valid loss : 5.813. lr : 0.00180. uptime : 00h31min. ETA : 00h27min.
+Iter 08448/16000. train loss : 5.812. valid loss : 5.753. lr : 0.00180. uptime : 00h31min. ETA : 00h27min.
+Iter 08512/16000. train loss : 5.601. valid loss : 5.790. lr : 0.00180. uptime : 00h31min. ETA : 00h26min.
+Iter 08576/16000. train loss : 5.809. valid loss : 5.786. lr : 0.00180. uptime : 00h32min. ETA : 00h26min.
+Iter 08640/16000. train loss : 5.614. valid loss : 5.755. lr : 0.00180. uptime : 00h32min. ETA : 00h26min.
+Iter 08704/16000. train loss : 5.410. valid loss : 5.784. lr : 0.00180. uptime : 00h32min. ETA : 00h26min.
+Iter 08768/16000. train loss : 5.951. valid loss : 5.747. lr : 0.00180. uptime : 00h32min. ETA : 00h26min.
+Iter 08832/16000. train loss : 5.677. valid loss : 5.812. lr : 0.00180. uptime : 00h33min. ETA : 00h25min.
+Iter 08896/16000. train loss : 5.719. valid loss : 5.796. lr : 0.00180. uptime : 00h33min. ETA : 00h25min.
+Iter 08960/16000. train loss : 5.942. valid loss : 5.840. lr : 0.00180. uptime : 00h33min. ETA : 00h25min.
+Iter 09024/16000. train loss : 5.971. valid loss : 5.793. lr : 0.00180. uptime : 00h33min. ETA : 00h32min.
+Iter 09088/16000. train loss : 5.675. valid loss : 5.765. lr : 0.00180. uptime : 00h34min. ETA : 00h24min.
+Iter 09152/16000. train loss : 5.909. valid loss : 5.858. lr : 0.00180. uptime : 00h34min. ETA : 00h24min.
+Iter 09216/16000. train loss : 5.928. valid loss : 5.803. lr : 0.00180. uptime : 00h34min. ETA : 00h24min.
+Iter 09280/16000. train loss : 5.893. valid loss : 5.792. lr : 0.00180. uptime : 00h34min. ETA : 00h24min.
+Iter 09344/16000. train loss : 5.778. valid loss : 5.793. lr : 0.00180. uptime : 00h35min. ETA : 00h23min.
+Iter 09408/16000. train loss : 6.375. valid loss : 5.787. lr : 0.00180. uptime : 00h35min. ETA : 00h23min.
+Iter 09472/16000. train loss : 6.056. valid loss : 5.771. lr : 0.00180. uptime : 00h35min. ETA : 00h23min.
+Iter 09536/16000. train loss : 5.768. valid loss : 5.796. lr : 0.00180. uptime : 00h35min. ETA : 00h23min.
+Iter 09600/16000. train loss : 5.628. valid loss : 5.870. lr : 0.00180. uptime : 00h35min. ETA : 00h22min.
+Iter 09664/16000. train loss : 5.961. valid loss : 5.769. lr : 0.00180. uptime : 00h36min. ETA : 00h22min.
+Iter 09728/16000. train loss : 5.947. valid loss : 5.783. lr : 0.00180. uptime : 00h36min. ETA : 00h22min.
+Iter 09792/16000. train loss : 5.844. valid loss : 5.779. lr : 0.00180. uptime : 00h36min. ETA : 00h22min.
+Iter 09856/16000. train loss : 5.579. valid loss : 5.814. lr : 0.00180. uptime : 00h36min. ETA : 00h21min.
+Iter 09920/16000. train loss : 5.784. valid loss : 5.735. lr : 0.00180. uptime : 00h37min. ETA : 00h21min.
+Iter 09984/16000. train loss : 5.719. valid loss : 5.788. lr : 0.00180. uptime : 00h37min. ETA : 00h21min.
+Iter 10048/16000. train loss : 5.729. valid loss : 5.742. lr : 0.00180. uptime : 00h37min. ETA : 00h28min.
+Iter 10112/16000. train loss : 5.889. valid loss : 5.735. lr : 0.00180. uptime : 00h37min. ETA : 00h21min.
+Iter 10176/16000. train loss : 5.734. valid loss : 5.798. lr : 0.00180. uptime : 00h38min. ETA : 00h20min.
+Iter 10240/16000. train loss : 5.776. valid loss : 5.803. lr : 0.00180. uptime : 00h38min. ETA : 00h20min.
+Iter 10304/16000. train loss : 5.850. valid loss : 5.769. lr : 0.00180. uptime : 00h38min. ETA : 00h20min.
+Iter 10368/16000. train loss : 5.659. valid loss : 5.791. lr : 0.00180. uptime : 00h38min. ETA : 00h20min.
+Iter 10432/16000. train loss : 5.712. valid loss : 5.778. lr : 0.00180. uptime : 00h39min. ETA : 00h19min.
+Iter 10496/16000. train loss : 5.695. valid loss : 5.830. lr : 0.00180. uptime : 00h39min. ETA : 00h19min.
+Iter 10560/16000. train loss : 5.755. valid loss : 5.877. lr : 0.00180. uptime : 00h39min. ETA : 00h19min.
+Iter 10624/16000. train loss : 5.663. valid loss : 5.736. lr : 0.00180. uptime : 00h39min. ETA : 00h19min.
+Iter 10688/16000. train loss : 5.620. valid loss : 5.719. lr : 0.00180. uptime : 00h40min. ETA : 00h18min.
+Iter 10752/16000. train loss : 5.563. valid loss : 5.694. lr : 0.00180. uptime : 00h40min. ETA : 00h18min.
+Iter 10816/16000. train loss : 5.806. valid loss : 5.742. lr : 0.00180. uptime : 00h40min. ETA : 00h18min.
+Iter 10880/16000. train loss : 5.538. valid loss : 5.756. lr : 0.00180. uptime : 00h40min. ETA : 00h18min.
+Iter 10944/16000. train loss : 5.713. valid loss : 5.764. lr : 0.00180. uptime : 00h40min. ETA : 00h17min.
+Iter 11008/16000. train loss : 5.283. valid loss : 5.725. lr : 0.00180. uptime : 00h41min. ETA : 00h24min.
+Iter 11072/16000. train loss : 5.783. valid loss : 5.766. lr : 0.00180. uptime : 00h41min. ETA : 00h17min.
+Iter 11136/16000. train loss : 5.883. valid loss : 5.764. lr : 0.00180. uptime : 00h41min. ETA : 00h17min.
+Iter 11200/16000. train loss : 5.592. valid loss : 5.796. lr : 0.00180. uptime : 00h41min. ETA : 00h17min.
+Iter 11264/16000. train loss : 5.828. valid loss : 5.777. lr : 0.00180. uptime : 00h42min. ETA : 00h16min.
+Iter 11328/16000. train loss : 5.679. valid loss : 5.770. lr : 0.00180. uptime : 00h42min. ETA : 00h16min.
+Iter 11392/16000. train loss : 5.601. valid loss : 5.761. lr : 0.00180. uptime : 00h42min. ETA : 00h16min.
+Iter 11456/16000. train loss : 5.720. valid loss : 5.802. lr : 0.00180. uptime : 00h42min. ETA : 00h16min.
+Iter 11520/16000. train loss : 5.825. valid loss : 5.825. lr : 0.00180. uptime : 00h43min. ETA : 00h15min.
+Iter 11584/16000. train loss : 5.834. valid loss : 5.735. lr : 0.00180. uptime : 00h43min. ETA : 00h15min.
+Iter 11648/16000. train loss : 5.759. valid loss : 5.782. lr : 0.00180. uptime : 00h43min. ETA : 00h15min.
+Iter 11712/16000. train loss : 5.826. valid loss : 5.748. lr : 0.00180. uptime : 00h43min. ETA : 00h15min.
+Iter 11776/16000. train loss : 5.695. valid loss : 5.814. lr : 0.00180. uptime : 00h44min. ETA : 00h14min.
+Iter 11840/16000. train loss : 5.780. valid loss : 5.745. lr : 0.00180. uptime : 00h44min. ETA : 00h14min.
+Iter 11904/16000. train loss : 5.827. valid loss : 5.730. lr : 0.00180. uptime : 00h44min. ETA : 00h14min.
+Iter 11968/16000. train loss : 5.916. valid loss : 5.727. lr : 0.00180. uptime : 00h44min. ETA : 00h14min.
+Iter 12032/16000. train loss : 5.739. valid loss : 5.749. lr : 0.00180. uptime : 00h45min. ETA : 00h19min.
+Iter 12096/16000. train loss : 5.756. valid loss : 5.769. lr : 0.00180. uptime : 00h45min. ETA : 00h13min.
+Iter 12160/16000. train loss : 5.699. valid loss : 5.741. lr : 0.00180. uptime : 00h45min. ETA : 00h13min.
+Iter 12224/16000. train loss : 5.909. valid loss : 5.867. lr : 0.00180. uptime : 00h45min. ETA : 00h13min.
+Iter 12288/16000. train loss : 5.711. valid loss : 5.772. lr : 0.00180. uptime : 00h45min. ETA : 00h12min.
+Iter 12352/16000. train loss : 5.481. valid loss : 5.746. lr : 0.00180. uptime : 00h46min. ETA : 00h12min.
+Iter 12416/16000. train loss : 5.854. valid loss : 5.771. lr : 0.00180. uptime : 00h46min. ETA : 00h12min.
+Iter 12480/16000. train loss : 5.861. valid loss : 5.726. lr : 0.00180. uptime : 00h46min. ETA : 00h12min.
+Iter 12544/16000. train loss : 5.409. valid loss : 5.769. lr : 0.00180. uptime : 00h46min. ETA : 00h12min.
+Iter 12608/16000. train loss : 5.877. valid loss : 5.816. lr : 0.00180. uptime : 00h47min. ETA : 00h11min.
+Iter 12672/16000. train loss : 5.668. valid loss : 5.752. lr : 0.00180. uptime : 00h47min. ETA : 00h11min.
+Iter 12736/16000. train loss : 5.825. valid loss : 5.743. lr : 0.00180. uptime : 00h47min. ETA : 00h11min.
+Iter 12800/16000. train loss : 5.639. valid loss : 5.719. lr : 0.00180. uptime : 00h47min. ETA : 00h11min.
+Iter 12864/16000. train loss : 5.613. valid loss : 5.786. lr : 0.00180. uptime : 00h48min. ETA : 00h10min.
+Iter 12928/16000. train loss : 6.003. valid loss : 5.789. lr : 0.00180. uptime : 00h48min. ETA : 00h10min.
+Iter 12992/16000. train loss : 6.322. valid loss : 5.737. lr : 0.00180. uptime : 00h48min. ETA : 00h10min.
+Iter 13056/16000. train loss : 6.420. valid loss : 5.748. lr : 0.00180. uptime : 00h48min. ETA : 00h17min.
+Iter 13120/16000. train loss : 5.827. valid loss : 5.777. lr : 0.00180. uptime : 00h49min. ETA : 00h09min.
+Iter 13184/16000. train loss : 5.694. valid loss : 5.746. lr : 0.00180. uptime : 00h49min. ETA : 00h09min.
+Iter 13248/16000. train loss : 5.879. valid loss : 5.543. lr : 0.00180. uptime : 00h49min. ETA : 00h09min.
+Iter 13312/16000. train loss : 5.781. valid loss : 5.720. lr : 0.00180. uptime : 00h49min. ETA : 00h09min.
+Iter 13376/16000. train loss : 5.530. valid loss : 5.795. lr : 0.00180. uptime : 00h50min. ETA : 00h08min.
+Iter 13440/16000. train loss : 5.803. valid loss : 5.776. lr : 0.00180. uptime : 00h50min. ETA : 00h08min.
+Iter 13504/16000. train loss : 5.727. valid loss : 5.770. lr : 0.00180. uptime : 00h50min. ETA : 00h08min.
+Iter 13568/16000. train loss : 5.602. valid loss : 5.705. lr : 0.00180. uptime : 00h50min. ETA : 00h08min.
+Iter 13632/16000. train loss : 5.529. valid loss : 5.775. lr : 0.00180. uptime : 00h50min. ETA : 00h07min.
+Iter 13696/16000. train loss : 5.960. valid loss : 5.778. lr : 0.00180. uptime : 00h51min. ETA : 00h07min.
+Iter 13760/16000. train loss : 5.604. valid loss : 5.734. lr : 0.00180. uptime : 00h51min. ETA : 00h07min.
+Iter 13824/16000. train loss : 5.854. valid loss : 5.759. lr : 0.00180. uptime : 00h51min. ETA : 00h07min.
+Iter 13888/16000. train loss : 5.729. valid loss : 5.740. lr : 0.00180. uptime : 00h51min. ETA : 00h07min.
+Iter 13952/16000. train loss : 5.674. valid loss : 5.730. lr : 0.00180. uptime : 00h52min. ETA : 00h06min.
+Iter 14016/16000. train loss : 5.545. valid loss : 5.709. lr : 0.00180. uptime : 00h52min. ETA : 00h14min.
+Iter 14080/16000. train loss : 5.966. valid loss : 5.703. lr : 0.00180. uptime : 00h52min. ETA : 00h06min.
+Iter 14144/16000. train loss : 5.457. valid loss : 5.761. lr : 0.00180. uptime : 00h52min. ETA : 00h06min.
+Iter 14208/16000. train loss : 5.681. valid loss : 5.744. lr : 0.00180. uptime : 00h53min. ETA : 00h05min.
+Iter 14272/16000. train loss : 5.651. valid loss : 5.760. lr : 0.00180. uptime : 00h53min. ETA : 00h05min.
+Iter 14336/16000. train loss : 5.692. valid loss : 5.761. lr : 0.00180. uptime : 00h53min. ETA : 00h05min.
+----- Starting cooldown -----
+Iter 14400/16000. train loss : 5.705. valid loss : 5.745. lr : 0.00152. uptime : 00h53min. ETA : 00h12min.
+Iter 14464/16000. train loss : 6.338. valid loss : 5.762. lr : 0.00134. uptime : 00h54min. ETA : 00h04min.
+Iter 14528/16000. train loss : 5.662. valid loss : 5.707. lr : 0.00122. uptime : 00h54min. ETA : 00h04min.
+Iter 14592/16000. train loss : 5.493. valid loss : 5.688. lr : 0.00112. uptime : 00h54min. ETA : 00h04min.
+Iter 14656/16000. train loss : 5.751. valid loss : 5.643. lr : 0.00103. uptime : 00h54min. ETA : 00h04min.
+Iter 14720/16000. train loss : 5.821. valid loss : 5.632. lr : 0.00096. uptime : 00h55min. ETA : 00h03min.
+Iter 14784/16000. train loss : 5.400. valid loss : 5.642. lr : 0.00088. uptime : 00h55min. ETA : 00h03min.
+Iter 14848/16000. train loss : 5.998. valid loss : 5.684. lr : 0.00082. uptime : 00h55min. ETA : 00h03min.
+Iter 14912/16000. train loss : 5.728. valid loss : 5.638. lr : 0.00075. uptime : 00h55min. ETA : 00h03min.
+Iter 14976/16000. train loss : 5.693. valid loss : 5.608. lr : 0.00070. uptime : 00h55min. ETA : 00h02min.
+Iter 15040/16000. train loss : 5.476. valid loss : 5.606. lr : 0.00064. uptime : 00h56min. ETA : 00h08min.
+Iter 15104/16000. train loss : 5.610. valid loss : 5.601. lr : 0.00059. uptime : 00h56min. ETA : 00h02min.
+Iter 15168/16000. train loss : 5.625. valid loss : 5.592. lr : 0.00054. uptime : 00h56min. ETA : 00h02min.
+Iter 15232/16000. train loss : 5.677. valid loss : 5.615. lr : 0.00049. uptime : 00h56min. ETA : 00h01min.
+Iter 15296/16000. train loss : 5.810. valid loss : 5.601. lr : 0.00044. uptime : 00h57min. ETA : 00h01min.
+Iter 15360/16000. train loss : 5.137. valid loss : 5.593. lr : 0.00039. uptime : 00h57min. ETA : 00h01min.
+Iter 15424/16000. train loss : 5.458. valid loss : 5.614. lr : 0.00035. uptime : 00h57min. ETA : 00h01min.
+Iter 15488/16000. train loss : 5.867. valid loss : 5.589. lr : 0.00031. uptime : 00h57min. ETA : 00h01min.
+Iter 15552/16000. train loss : 5.477. valid loss : 5.628. lr : 0.00026. uptime : 00h58min. ETA : 00h00min.
+Iter 15616/16000. train loss : 5.639. valid loss : 5.616. lr : 0.00022. uptime : 00h58min. ETA : 00h02min.
+Iter 15680/16000. train loss : 5.562. valid loss : 5.571. lr : 0.00018. uptime : 00h58min. ETA : 00h00min.
+Iter 15744/16000. train loss : 5.416. valid loss : 5.520. lr : 0.00015. uptime : 00h58min. ETA : 00h00min.
+Iter 15808/16000. train loss : 5.511. valid loss : 5.551. lr : 0.00011. uptime : 00h59min. ETA : -1h59min.
+Iter 15872/16000. train loss : 5.561. valid loss : 5.531. lr : 0.00007. uptime : 00h59min. ETA : -1h59min.
+Iter 15936/16000. train loss : 5.544. valid loss : 5.598. lr : 0.00003. uptime : 00h59min. ETA : -1h59min.
+Training is done. Took 59.73 minutes.
+Successfully saved checkpoint and config in runs/glowing-violet-33.
+wandb: - 0.032 MB of 0.032 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:     grad_norm █▂▂▁▁▁▁▁▁▁▁▁▁▃▁▁▁▁▁▁▁▁▁▂▁▁▁▂▁▁▂▁▁▁▂▁▂▁▂▂
+wandb:            lr ▅████████████████████████████████████▄▃▁
+wandb:     num_iters ▁
+wandb:    num_params ▁
+wandb:    num_tokens ▁
+wandb: time_per_iter ▁▁▁▁▁▁▁▁▁▇▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█▁▁▁▁▁▁█▁▁▁▁▁▁▁
+wandb:   tokens_seen ▁▁▁▁▁▂▂▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇███
+wandb:    train_loss ██▅▄▃▂▂▃▃▂▂▃▃▃▂▁▂▁▂▂▂▂▂▂▂▂▂▂▂▂▂▃▂▂▃▄▂▂▂▁
+wandb:      val_loss █▇▃▂▃▂▂▂▂▁▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:             dtype bfloat16
+wandb:         grad_norm 0.40572
+wandb:                lr 3e-05
+wandb:         num_iters 15999
+wandb:        num_params 123551232
+wandb:        num_tokens 262127616
+wandb:     time_per_iter 0.2212
+wandb:       tokens_seen 261095424
+wandb:        train_loss 5.54395
+wandb:    use_flash_attn True
+wandb: use_torch_compile True
+wandb:          val_loss 5.59804
+wandb: 
+wandb: 🚀 View run glowing-violet-33 at: https://wandb.ai/alexandretl/arena/runs/hgg5x1jz
+wandb: ⭐️ View project at: https://wandb.ai/alexandretl/arena
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240917_133336-hgg5x1jz/logs

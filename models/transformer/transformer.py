@@ -160,7 +160,7 @@ class SelfAttentionMultiHead(nn.Module):
             self.k_in_v_proj = nn.Linear(config.max_len, config.max_len, bias=False)
 
         # RoPE embedding
-        self.rotary_emb = rotary_emb
+        #self.rotary_emb = rotary_emb
 
         if not config.flash or config.super_attn:
             # compute the mask once and for all here 
@@ -172,6 +172,8 @@ class SelfAttentionMultiHead(nn.Module):
         # output projection
         self.c_proj = nn.Linear(config.d_model, config.d_model, bias=config.bias)
 
+        self.rotary = Rotary(self.config.d_head)
+
         # regularization
         self.attn_drop = nn.Dropout(config.dropout)
         self.resid_dropout = nn.Dropout(config.dropout)
@@ -182,17 +184,17 @@ class SelfAttentionMultiHead(nn.Module):
         B, L, _ = X.size()
 
         # Q,K,V projections
-        Q = self.query_proj(X).view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_query)
+        Q = self.query_proj(X).view(B, L, self.config.n_heads, self.config.d_head)#.transpose(1, 2) # (B, n_heads, L, d_query)
 
         if not self.config.efficient_attn:
-            K = self.key_proj(X).view(B, L, self.config.n_kv_heads, self.config.d_head).transpose(1, 2) # (B, n_kv_heads, L, d_key)
+            K = self.key_proj(X).view(B, L, self.config.n_kv_heads, self.config.d_head)#.transpose(1, 2) # (B, n_kv_heads, L, d_key)
         else:
-            K = X.view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_kv_heads, L, d_key)
+            K = X.view(B, L, self.config.n_heads, self.config.d_head)#.transpose(1, 2) # (B, n_kv_heads, L, d_key)
 
         if not self.config.optimised_attn:
-            V = self.value_proj(X).view(B, L, self.config.n_kv_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_head=d_value)
+            V = self.value_proj(X).view(B, L, self.config.n_kv_heads, self.config.d_head)#.transpose(1, 2) # (B, n_heads, L, d_head=d_value)
         else:
-            V = X.view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_head=d_value)
+            V = X.view(B, L, self.config.n_heads, self.config.d_head)#.transpose(1, 2) # (B, n_heads, L, d_head=d_value)
 
         # kv cache implementation
         if cache is not None:
@@ -207,8 +209,12 @@ class SelfAttentionMultiHead(nn.Module):
 
         # RoPE
         if self.config.pos_emb == "rope" and cache is None:
-            Q = self.rotary_emb.rotate_queries_or_keys(Q)
-            K = self.rotary_emb.rotate_queries_or_keys(K)
+            #Q = self.rotary_emb.rotate_queries_or_keys(Q)
+            #K = self.rotary_emb.rotate_queries_or_keys(K)
+
+            cos, sin = self.rotary(Q)
+            Q = apply_rotary_emb(Q, cos, sin)
+            K = apply_rotary_emb(K, cos, sin)
         elif self.config.pos_emb == "rope":
             Q, K = self.rotary_emb.rotate_queries_with_cached_keys(Q, K)
 
@@ -277,3 +283,31 @@ def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
         return hidden_states
     hidden_states = hidden_states[:, :, None, :, :].expand(batch, num_key_value_heads, n_rep, slen, head_dim)
     return hidden_states.reshape(batch, num_key_value_heads * n_rep, slen, head_dim)
+
+class Rotary(torch.nn.Module):
+    def __init__(self, dim, base=10000):
+        super().__init__()
+        inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2).float() / dim))
+        self.register_buffer("inv_freq", inv_freq)
+        self.seq_len_cached = None
+        self.cos_cached = None
+        self.sin_cached = None
+
+    def forward(self, x):
+        seq_len = x.shape[1]
+        if seq_len != self.seq_len_cached:
+            self.seq_len_cached = seq_len
+            t = torch.arange(seq_len, device=x.device).type_as(self.inv_freq)
+            freqs = torch.outer(t, self.inv_freq).to(x.device)
+            self.cos_cached = freqs.cos()
+            self.sin_cached = freqs.sin()
+        return self.cos_cached[None, :, None, :], self.sin_cached[None, :, None, :]
+
+def apply_rotary_emb(x, cos, sin):
+    assert x.ndim == 4 # multihead attention
+    d = x.shape[3]//2
+    x1 = x[..., :d]
+    x2 = x[..., d:]
+    y1 = x1 * cos + x2 * sin
+    y2 = x1 * (-sin) + x2 * cos
+    return torch.cat([y1, y2], 3)

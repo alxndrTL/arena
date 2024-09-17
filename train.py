@@ -36,8 +36,8 @@ import torch.optim.lr_scheduler as lr_scheduler
 from utils.lr_schedules import cosine_warmup_schedule, wsd_schedule
 
 from models.lm import LM
-#from models.transformer.transformer import TransformerConfig
-from models.transformer.transformer_gpt import TransformerGPTConfig as TransformerConfig
+from models.transformer.transformer import TransformerConfig
+#from models.transformer.transformer_gpt import TransformerGPTConfig as TransformerConfig
 from models.mamba.mamba import MambaConfig
 from models.mamba.mamba2 import Mamba2Config
 
@@ -47,7 +47,7 @@ from utils.misc import format_time
 
 # ---------------------------------------------
 
-seed = 0 # 0, 1, 2...
+seed = 2 # 0, 1, 2...
 
 # --- downstream eval parameters ---
 #eval_interval = 1000
@@ -91,7 +91,7 @@ use_mup = False
 mup_base_width = 288
 
 # --- training parameters ---
-num_iters = 8200
+num_iters = 16000
 total_batch_size = 16
 micro_batch_size = 16
 
@@ -122,7 +122,7 @@ dtype = "bfloat16" # "float32" or "bfloat16"
 
 # --- saving/checkpointing parameters ---
 save_dir = "runs/" # where to save to
-ckpt_interval = 20000 # None if you don't want checkpointing
+ckpt_interval = 1000 # None if you don't want checkpointing
 # size of each checkpointing file, in MB : 12 * number of parameters (in M)
 
 ckpt = "" # if you want to restart training from a checkpoint (path/to/model.pth)
@@ -131,7 +131,7 @@ start_iter = 0 # specify starting iter (if loading from ckpt_60000, put 60001)
 # --- logging and eval parameters ---
 log_wandb = True
 
-train_log_interval = 1
+train_log_interval = 64
 eval_val_interval = 64 # also the printing period
 eval_val_iters = 50
 
@@ -233,8 +233,8 @@ grad_acc_steps = total_batch_size // micro_batch_size
 # model
 
 if architecture == "Transformer":
-    #config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
-    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
+    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
+    #config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
 elif architecture == "Mamba":
     config = MambaConfig(d_model=d_model, n_layers=n_layers, bias=bias, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, use_cuda=use_cuda)
 elif architecture == "Mamba2":
@@ -253,6 +253,22 @@ elif optimizer == "Adam-mini": # todo : mup
     raise NotImplementedError
 else:
     raise NotImplementedError
+
+"""
+num_vocab = vocab_size
+model_config = {
+        "d12": GPTConfig(vocab_size=num_vocab, n_layer=12, n_head=12, n_embd=768),
+        "d24": GPTConfig(vocab_size=num_vocab, n_layer=24, n_head=16, n_embd=1024),
+        "d36": GPTConfig(vocab_size=num_vocab, n_layer=36, n_head=20, n_embd=1280),
+        "d48": GPTConfig(vocab_size=num_vocab, n_layer=48, n_head=25, n_embd=1600),
+}["d12"]
+model = GPT(model_config)
+model = model.train().cuda()
+
+optim = model.configure_optimizers(weight_decay=weight_decay,
+                                               learning_rate=lr, betas=(0.9, 0.95),
+                                               device_type=device)
+"""
 
 if ckpt != "":
     checkpoint = torch.load(ckpt)
@@ -292,6 +308,7 @@ try:
             with dtype_ctx:
                 logits = model(x)
                 loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
+                #_, loss = model(x, y, return_logits=False)
                 loss = loss / grad_acc_steps
                 loss_total += loss.detach()
 
@@ -310,7 +327,8 @@ try:
 
         # lr decay
         scheduler.step()
-        lr_iter = scheduler.get_last_lr()[1] # param group 1 has a "fixed" lr (ie not affected by muP)
+        lr_iter = scheduler.get_last_lr()[0] # param group 1 has a "fixed" lr (ie not affected by muP)
+        # TODO : CHANGE TO 1 OR DO SOMETHING
 
         # logging : print and wandb
         to_log = {}
@@ -341,6 +359,7 @@ try:
                     with dtype_ctx:
                         logits = model(x)
                         loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
+                        #_, loss = model(x, y, return_logits=False)
                     eval_loss += loss.item()
 
                 eval_loss /= eval_val_iters
@@ -403,6 +422,7 @@ if benchmark:
 end_time = time.time()
 print(f"Training is done. Took {(end_time-start_time)/60:.2f} minutes.")
 
+"""
 # saving : config + model checkpoint (model+optim)
 config_dict = asdict(config)
 
@@ -416,6 +436,7 @@ else:
     raise NotImplementedError
 
 json.dump(config_dict, open(os.path.join(save_dir, 'config.json'), 'w'))
+"""
 
 checkpoint = {"model": unoptimized_model.state_dict(),
               "optimizer": optim.state_dict()}

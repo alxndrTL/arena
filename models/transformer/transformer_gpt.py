@@ -162,6 +162,8 @@ class SelfAttentionMultiHead(nn.Module):
         # output projection
         self.c_proj = nn.Linear(config.d_model, config.d_model, bias=config.bias)
 
+        self.rotary = Rotary(self.config.d_head)
+
         # regularization
         self.attn_drop = nn.Dropout(config.dropout)
         self.resid_dropout = nn.Dropout(config.dropout)
@@ -172,17 +174,17 @@ class SelfAttentionMultiHead(nn.Module):
         B, L, _ = X.size()
 
         # Q,K,V projections
-        Q = self.query_proj(X).view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_query)
+        Q = self.query_proj(X).view(B, L, self.config.n_heads, self.config.d_head)#.transpose(1, 2) # (B, n_heads, L, d_query)
 
         if not self.config.efficient_attn:
-            K = self.key_proj(X).view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_kv_heads, L, d_key)
+            K = self.key_proj(X).view(B, L, self.config.n_heads, self.config.d_head)#.transpose(1, 2) # (B, n_kv_heads, L, d_key)
         else:
-            K = X.view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_kv_heads, L, d_key)
+            K = X.view(B, L, self.config.n_heads, self.config.d_head)#.transpose(1, 2) # (B, n_kv_heads, L, d_key)
 
         if not self.config.optimised_attn:
-            V = self.value_proj(X).view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_head=d_value)
+            V = self.value_proj(X).view(B, L, self.config.n_heads, self.config.d_head)#.transpose(1, 2) # (B, n_heads, L, d_head=d_value)
         else:
-            V = X.view(B, L, self.config.n_heads, self.config.d_head).transpose(1, 2) # (B, n_heads, L, d_head=d_value)
+            V = X.view(B, L, self.config.n_heads, self.config.d_head)#.transpose(1, 2) # (B, n_heads, L, d_head=d_value)
 
         # kv cache implementation
         if cache is not None:
@@ -194,11 +196,16 @@ class SelfAttentionMultiHead(nn.Module):
                 V = torch.cat([past_values, V], dim=2)
             
             cache = (K, V) # prepare cache for next token
-
+        
         # RoPE
         if self.config.pos_emb == "rope" and cache is None:
-            Q = self.rotary_emb.rotate_queries_or_keys(Q)
-            K = self.rotary_emb.rotate_queries_or_keys(K)
+            #Q = self.rotary_emb.rotate_queries_or_keys(Q)
+            #K = self.rotary_emb.rotate_queries_or_keys(K)
+
+            cos, sin = self.rotary(Q)
+            Q = apply_rotary_emb(Q, cos, sin)
+            K = apply_rotary_emb(K, cos, sin)
+
         elif self.config.pos_emb == "rope":
             Q, K = self.rotary_emb.rotate_queries_with_cached_keys(Q, K)
 
@@ -206,7 +213,7 @@ class SelfAttentionMultiHead(nn.Module):
         scale = self.config.mup_attn_mult/self.config.d_head if self.config.mup else 1/math.sqrt(self.config.d_head)
 
         if self.config.flash and not self.config.super_attn:
-            attention = F.scaled_dot_product_attention(Q, K, V, attn_mask=None, dropout_p=self.config.dropout if self.training else 0, is_causal=not(L==1), scale=scale)
+            attention = F.scaled_dot_product_attention(Q.transpose(1, 2), K.transpose(1, 2), V.transpose(1, 2), attn_mask=None, dropout_p=self.config.dropout if self.training else 0, is_causal=not(L==1), scale=scale)
         else:
             QK_T = Q @ torch.transpose(K, 2, 3) # (B, n_heads, L, L)
             QK_T = QK_T + self.mask[:, :, :L, :L]
@@ -247,3 +254,32 @@ class RMSNorm(nn.Module):
             return output * self.weight
         else:
             return output
+
+
+class Rotary(torch.nn.Module):
+    def __init__(self, dim, base=10000):
+        super().__init__()
+        inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2).float() / dim))
+        self.register_buffer("inv_freq", inv_freq)
+        self.seq_len_cached = None
+        self.cos_cached = None
+        self.sin_cached = None
+
+    def forward(self, x):
+        seq_len = x.shape[1]
+        if seq_len != self.seq_len_cached:
+            self.seq_len_cached = seq_len
+            t = torch.arange(seq_len, device=x.device).type_as(self.inv_freq)
+            freqs = torch.outer(t, self.inv_freq).to(x.device)
+            self.cos_cached = freqs.cos()
+            self.sin_cached = freqs.sin()
+        return self.cos_cached[None, :, None, :], self.sin_cached[None, :, None, :]
+
+def apply_rotary_emb(x, cos, sin):
+    assert x.ndim == 4 # multihead attention
+    d = x.shape[3]//2
+    x1 = x[..., :d]
+    x2 = x[..., d:]
+    y1 = x1 * cos + x2 * sin
+    y2 = x1 * (-sin) + x2 * cos
+    return torch.cat([y1, y2], 3)
