@@ -85,6 +85,7 @@ class CausalSelfAttention(nn.Module):
         y = self.c_proj(y)
         return y
 
+"""
 class MLP(nn.Module):
 
     def __init__(self, config):
@@ -97,6 +98,18 @@ class MLP(nn.Module):
         x = F.gelu(x)
         x = self.c_proj(x)
         return x
+"""
+
+class MLP(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+
+        self.fc_1 = nn.Linear(config.n_embd, 2048, bias=False)
+        self.fc_2 = nn.Linear(2048, config.n_embd, bias=False)
+        self.fc_3 = nn.Linear(config.n_embd, 2048, bias=False)
+
+    def forward(self, x):
+        return self.fc_2(F.silu(self.fc_1(x)) * self.fc_3(x))
 
 class Block(nn.Module):
 
@@ -135,9 +148,6 @@ class GPT(nn.Module):
         self.transformer.wte.weight = self.lm_head.weight # https://paperswithcode.com/method/weight-tying
 
     def forward(self, idx, targets=None, return_logits=True):
-        b, t = idx.size()
-        pos = torch.arange(0, t, dtype=torch.long, device=idx.device) # shape (t)
-
         # forward the GPT model itself
         x = self.transformer.wte(idx) # token embeddings of shape (b, t, n_embd)
 
@@ -186,6 +196,7 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", type=str, default="", help="output directory to which to write logs and checkpoints")
     parser.add_argument("--model", type=str, default="d12", help="d12|d24|d36|d48")
     # token layout for each step of the optimization
+    parser.add_argument("--total_batch_size", type=int, default=32)
     parser.add_argument("--batch_size", type=int, default=4, help="batch size, in units of #batch dimensions")
     parser.add_argument("--sequence_length", type=int, default=64, help="sequence length")
     # workload (number of steps)
@@ -234,6 +245,7 @@ if __name__ == "__main__":
     model = GPT(model_config)
     model = model.train().cuda()
     print(f"Model initialized. Number of parameters : {sum([p.numel() for p in model.parameters()])}.")
+    print(model)
     if hasattr(config, "coordinate_descent_tuning"):
         config.coordinate_descent_tuning = True # suggested by @Chillee
     print("compiling the model...")
@@ -306,14 +318,19 @@ if __name__ == "__main__":
         # --------------- TRAINING SECTION BEGIN -----------------
         model.train()
         # forward pass
-        with ctx:
-            _, loss = model(x, y, return_logits=False)
-            train_loss = loss.detach()
-        # advance the dataset for the next batch
-        x, y = train_loader.next_batch()
-        x, y = x.cuda(), y.cuda()
-        # backward pass
-        loss.backward()
+        train_loss = 0.
+        for micro_step in range(args.total_batch_size//args.batch_size):
+            x, y = train_loader.next_batch()
+            x, y = x.cuda(), y.cuda()
+
+            with ctx:
+                _, loss = model(x, y, return_logits=False)
+                loss = loss / (args.total_batch_size//args.batch_size)
+                train_loss += loss.detach()
+            
+            # backward pass
+            loss.backward()
+
         # determine and set the learning rate for this iteration
         lr = get_lr(step)
         for param_group in optimizer.param_groups:
@@ -340,7 +357,7 @@ if __name__ == "__main__":
         if step > 0 and step > args.num_iterations - 20:
             timings.append(t1-t0)
 
-        if (step+1) % 64 == 0:
+        if (step+1) % args.val_loss_every == 0:
             to_log = {"train_loss": lossf, "lr": lr}
             wandb.log(to_log, step=step)
 

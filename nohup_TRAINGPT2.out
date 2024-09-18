@@ -1,58 +1,79 @@
+Running pytorch 2.2.0+cu121
 wandb: Using wandb-core as the SDK backend. Please refer to https://wandb.me/wandb-core for more information.
 wandb: Currently logged in as: alexandretl. Use `wandb login --relogin` to force relogin
 wandb: Tracking run with wandb version 0.18.1
-wandb: Run data is saved locally in /workspace/arena/wandb/run-20240918_192540-jkppyezn
+wandb: Run data is saved locally in /workspace/arena/wandb/run-20240918_152142-an8rti5j
 wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run wobbly-totem-85
+wandb: Syncing run astral-lake-70
 wandb: ⭐️ View project at https://wandb.ai/alexandretl/arena
-wandb: 🚀 View run at https://wandb.ai/alexandretl/arena/runs/jkppyezn
-Run name: wobbly-totem-85.
+wandb: 🚀 View run at https://wandb.ai/alexandretl/arena/runs/an8rti5j
 DataLoader: total number of tokens: 10,255,324,043 across 103 files
 DataLoader: total number of tokens: 100,000,000 across 1 files
 Model initialized. Number of parameters : 123532032.
-Compiling the model...
-Done compiling.
-Training is starting.
-Iter 0000/8200. train loss : 10.985. valid loss : 10.982. lr : 0.00001. uptime : 00h00min. ETA : 05h45min.
-Iter 0012/8200. train loss : 9.123. valid loss : 9.043. lr : 0.00012. uptime : 00h01min. ETA : 10h09min.
-Iter 0024/8200. train loss : 7.845. valid loss : 7.750. lr : 0.00022. uptime : 00h02min. ETA : 09h49min.
-Iter 0036/8200. train loss : 7.018. valid loss : 6.980. lr : 0.00033. uptime : 00h03min. ETA : 09h48min.
-Iter 0048/8200. train loss : 6.653. valid loss : 6.604. lr : 0.00044. uptime : 00h03min. ETA : 09h47min.
-Iter 0060/8200. train loss : 6.413. valid loss : 6.446. lr : 0.00055. uptime : 00h04min. ETA : 09h47min.
-Iter 0072/8200. train loss : 6.280. valid loss : 6.224. lr : 0.00066. uptime : 00h05min. ETA : 09h46min.
-Iter 0084/8200. train loss : 6.095. valid loss : 6.069. lr : 0.00076. uptime : 00h06min. ETA : 09h45min.
-Process ForkProcess-31:
-Process ForkProcess-27:
-Process ForkProcess-15:
-Process ForkProcess-32:
+GPT(
+  (transformer): ModuleDict(
+    (wte): Embedding(50257, 768)
+    (h): ModuleList(
+      (0-11): 12 x Block(
+        (attn): CausalSelfAttention(
+          (c_attn): Linear(in_features=768, out_features=2304, bias=False)
+          (c_proj): Linear(in_features=768, out_features=768, bias=False)
+          (rotary): Rotary()
+        )
+        (mlp): MLP(
+          (fc_1): Linear(in_features=768, out_features=2048, bias=False)
+          (fc_2): Linear(in_features=2048, out_features=768, bias=False)
+          (fc_3): Linear(in_features=768, out_features=2048, bias=False)
+        )
+      )
+    )
+  )
+  (lm_head): Linear(in_features=768, out_features=50257, bias=False)
+)
+compiling the model...
+/usr/local/lib/python3.10/dist-packages/torch/_inductor/compile_fx.py:140: UserWarning: TensorFloat32 tensor cores for float32 matrix multiplication available but not enabled. Consider setting `torch.set_float32_matmul_precision('high')` for better performance.
+  warnings.warn(
+val loss 10.990180015563965
+step    1/8200 | train loss 10.988733 | lr 9.00e-06 | (71620.04 ms | 229 tok/s)
+step    2/8200 | train loss 10.912503 | lr 1.80e-05 | (3978.77 ms | 4118 tok/s)
+step    3/8200 | train loss 10.794247 | lr 2.70e-05 | (3978.52 ms | 4118 tok/s)
+step    4/8200 | train loss 10.651018 | lr 3.60e-05 | (3978.70 ms | 4118 tok/s)
+step    5/8200 | train loss 10.517947 | lr 4.50e-05 | (3980.42 ms | 4116 tok/s)
+step    6/8200 | train loss 10.338558 | lr 5.40e-05 | (3982.79 ms | 4114 tok/s)
+step    7/8200 | train loss 10.206798 | lr 6.30e-05 | (3982.57 ms | 4114 tok/s)
 Process ForkProcess-26:
 Process ForkProcess-30:
-Process ForkProcess-20:
-Process ForkProcess-24:
-Process ForkProcess-21:
-Process ForkProcess-25:
-Process ForkProcess-22:
-Process ForkProcess-13:
 Process ForkProcess-19:
-Process ForkProcess-17:
-Process ForkProcess-29:
+Process ForkProcess-31:
+Process ForkProcess-15:
+Process ForkProcess-32:
+Process ForkProcess-28:
+Process ForkProcess-13:
 Process ForkProcess-18:
 Process ForkProcess-23:
 Process ForkProcess-14:
+Process ForkProcess-27:
+Process ForkProcess-24:
+Process ForkProcess-12:
+Process ForkProcess-29:
 Process ForkProcess-7:
-Process ForkProcess-16:
-Process ForkProcess-2:
-Process ForkProcess-1:
-Process ForkProcess-11:
-Process ForkProcess-28:
+Process ForkProcess-25:
+Process ForkProcess-21:
 Process ForkProcess-9:
 Process ForkProcess-5:
-Process ForkProcess-12:
-Process ForkProcess-6:
-Process ForkProcess-10:
-Process ForkProcess-8:
-Process ForkProcess-3:
 Process ForkProcess-4:
+Process ForkProcess-16:
+Process ForkProcess-1:
+Process ForkProcess-3:
+Process ForkProcess-20:
+Process ForkProcess-17:
+Process ForkProcess-11:
+Process ForkProcess-8:
+Process ForkProcess-10:
+Process ForkProcess-22:
+Process ForkProcess-2:
+Process ForkProcess-6:
+Traceback (most recent call last):
 Traceback (most recent call last):
 Traceback (most recent call last):
 Traceback (most recent call last):
@@ -87,312 +108,264 @@ Traceback (most recent call last):
 Traceback (most recent call last):
   File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
     self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
   File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
     self.run()
   File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
     self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
   File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
     self._target(*self._args, **self._kwargs)
   File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
     call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
     with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
   File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
     self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
     call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/queues.py", line 103, in get
     res = self._recv_bytes()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/workspace/arena/train_gpt2.py", line 324, in <module>
+    x, y = x.cuda(), y.cuda()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
     self._target(*self._args, **self._kwargs)
   File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
     call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
     with self._rlock:
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
   File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
     self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
   File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
     call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
     with self._rlock:
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
 KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
   File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
     call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-KeyboardInterrupt
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-KeyboardInterrupt
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-KeyboardInterrupt
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-KeyboardInterrupt
-KeyboardInterrupt
-KeyboardInterrupt
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-KeyboardInterrupt
-KeyboardInterrupt
-  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
-    call_item = call_queue.get(block=True)
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
   File "/usr/lib/python3.10/multiprocessing/connection.py", line 216, in recv_bytes
     buf = self._recv_bytes(maxlength)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+KeyboardInterrupt
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/connection.py", line 414, in _recv_bytes
     buf = self._recv(4)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
   File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
     call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
     with self._rlock:
-KeyboardInterrupt
   File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
     call_item = call_queue.get(block=True)
-KeyboardInterrupt
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
-KeyboardInterrupt
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 240, in _process_worker
+    call_item = call_queue.get(block=True)
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
 KeyboardInterrupt
@@ -400,33 +373,54 @@ KeyboardInterrupt
     with self._rlock:
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
-KeyboardInterrupt
-  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
-    with self._rlock:
-Training interrupted.  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
-KeyboardInterrupt
-KeyboardInterrupt
-KeyboardInterrupt
-KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
   File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
     with self._rlock:
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
 KeyboardInterrupt
-  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
-    return self._semlock.__enter__()
-KeyboardInterrupt
-KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
   File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
     with self._rlock:
-
-KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
 KeyboardInterrupt
   File "/usr/lib/python3.10/multiprocessing/connection.py", line 379, in _recv
     chunk = read(handle, remaining)
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+KeyboardInterrupt
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
 KeyboardInterrupt
@@ -434,7 +428,26 @@ KeyboardInterrupt
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
 KeyboardInterrupt
-Training is done. Took 6.87 minutes.KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/queues.py", line 102, in get
+    with self._rlock:
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+KeyboardInterrupt
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
 KeyboardInterrupt
 KeyboardInterrupt
 KeyboardInterrupt
@@ -442,34 +455,15 @@ KeyboardInterrupt
   File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
     return self._semlock.__enter__()
 KeyboardInterrupt
-
-Successfully saved checkpoint and config in runs/wobbly-totem-85.
-wandb: - 0.007 MB of 0.007 MB uploadedwandb:                                                                                
-wandb: 
-wandb: Run history:
-wandb:            lr ▁▂▃▄▅▆▇█
-wandb:     num_iters ▁
-wandb:    num_params ▁
-wandb:    num_tokens ▁
-wandb: time_per_iter ▁█▆▆▆▆▆▆
-wandb:   tokens_seen ▁▂▃▄▅▆▇█
-wandb:    train_loss █▅▄▂▂▁▁▁
-wandb:      val_loss █▅▃▂▂▂▁▁
-wandb: 
-wandb: Run summary:
-wandb:             dtype bfloat16
-wandb:                lr 0.00076
-wandb:         num_iters 88
-wandb:        num_params 123532032
-wandb:        num_tokens 46137344
-wandb:     time_per_iter 4.33061
-wandb:       tokens_seen 44040192
-wandb:        train_loss 6.09452
-wandb:    use_flash_attn True
-wandb: use_torch_compile True
-wandb:          val_loss 6.0691
-wandb: 
-wandb: 🚀 View run wobbly-totem-85 at: https://wandb.ai/alexandretl/arena/runs/jkppyezn
-wandb: ⭐️ View project at: https://wandb.ai/alexandretl/arena
-wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
-wandb: Find logs at: ./wandb/run-20240918_192540-jkppyezn/logs
+KeyboardInterrupt
+KeyboardInterrupt
+  File "/usr/lib/python3.10/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+KeyboardInterrupt
+KeyboardInterrupt
+KeyboardInterrupt
+KeyboardInterrupt
+KeyboardInterrupt
+[1;34mwandb[0m: 🚀 View run [33mastral-lake-70[0m at: [34mhttps://wandb.ai/alexandretl/arena/runs/an8rti5j[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20240918_152142-an8rti5j/logs[0m

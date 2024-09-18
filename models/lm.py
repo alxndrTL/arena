@@ -16,7 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from models.transformer.transformer import Transformer, TransformerConfig, RMSNorm
+from models.transformer.transformer import Transformer, TransformerConfig, rmsnorm #RMSNorm
 #from models.transformer.transformer_gpt import Transformer, TransformerGPTConfig as TransformerConfig, RMSNorm
 from models.mamba.mamba2 import Mamba2, Mamba2Config
 from models.mamba.mamba import Mamba, MambaConfig
@@ -40,7 +40,7 @@ class LM(nn.Module):
         else:
             raise NotImplementedError
 
-        self.out_norm = RMSNorm(self.config.d_model, self.config.norm_eps, self.config.mup)
+        #self.out_norm = RMSNorm(self.config.d_model, self.config.norm_eps, self.config.mup)
 
         self.lm_head = nn.Linear(self.config.d_model, self.vocab_size, bias=False)
         self.embedding.weight = self.lm_head.weight
@@ -130,10 +130,10 @@ class LM(nn.Module):
         else: # transformer and mamba
             self.apply(self._init_weights)
             for pn, p in self.named_parameters():
-                if pn.endswith('fc_3.weight') or pn.endswith('c_proj.weight') or pn.endswith('mixer.out_proj.weight'):
+                if pn.endswith('fc_2.weight') or pn.endswith('c_proj.weight') or pn.endswith('mixer.out_proj.weight'):
                     torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std/math.sqrt(2 * self.config.n_layers), generator=self.rng)
 
-    def forward(self, tokens, caches=None, seq_pos=0):
+    def forward(self, tokens, targets=None, caches=None, return_logits=False, seq_pos=0):
         # tokens : (B, L)
 
         # logits : (B, L, vocab_size)
@@ -143,17 +143,19 @@ class LM(nn.Module):
             x = self.core(x)
         else:
             x, caches = self.core(x, caches, seq_pos)
-        x = self.out_norm(x)
+        #x = self.out_norm(x)
+        x = rmsnorm(x)
 
         if self.config.mup:
             x = x / self.config.mup_width_mult
 
         logits = self.lm_head(x)
-
-        if caches is None:
-            return logits
+        
+        if targets is not None:
+            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1)
+            return None, loss
         else:
-            return logits, caches
+            return None, caches
         
     def generate(self, prompt, num_tokens: int, sample: bool = True, top_k: int = None, temperature: float = 1.0):
         # prompt : (B, L)
@@ -393,6 +395,11 @@ class LM(nn.Module):
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std, generator=self.rng)
 
+    """
+    def configure_optimizers(self, weight_decay, learning_rate, betas, device_type):
+        optimizer = torch.optim.AdamW(self.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=betas)
+        return optimizer
+    """
     # adapted from llama2.c, with muP
     def configure_optimizers(self, weight_decay, learning_rate, betas, device_type):
         param_dict = {pn: p for pn, p in self.named_parameters()}

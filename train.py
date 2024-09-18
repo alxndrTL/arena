@@ -32,14 +32,18 @@ import wandb
 import torch
 import torch.nn.functional as F
 import torch.optim.lr_scheduler as lr_scheduler
+import torch._inductor.config as torch_ind_config
 
 from utils.lr_schedules import cosine_warmup_schedule, wsd_schedule
 
+#from models_bis.lm import LM
+#from models_bis.transformer.transformer import TransformerConfig # GPT
 from models.lm import LM
 from models.transformer.transformer import TransformerConfig
-#from models.transformer.transformer_gpt import TransformerGPTConfig as TransformerConfig
 from models.mamba.mamba import MambaConfig
 from models.mamba.mamba2 import Mamba2Config
+
+#from train_gpt2 import GPTConfig, GPT
 
 from data.dataloader import DataLoader
 
@@ -47,7 +51,7 @@ from utils.misc import format_time
 
 # ---------------------------------------------
 
-seed = 2 # 0, 1, 2...
+seed = 5 # 0, 1, 2...
 
 # --- downstream eval parameters ---
 #eval_interval = 1000
@@ -91,8 +95,8 @@ use_mup = False
 mup_base_width = 288
 
 # --- training parameters ---
-num_iters = 16000
-total_batch_size = 16
+num_iters = 8200
+total_batch_size = 512
 micro_batch_size = 16
 
 optimizer = "AdamW" # "AdamW" or "Adam-mini"
@@ -112,7 +116,7 @@ lr_decay_iters = 1640 # 10-20% of num_iters
 adam_b1 = 0.9
 adam_b2 = 0.95
 
-clip_value_grad = 1.0
+max_grad_norm = 1.0
 weight_decay = 0.1
 
 use_torch_compile = True # do not toggle if using Mamba
@@ -131,8 +135,8 @@ start_iter = 0 # specify starting iter (if loading from ckpt_60000, put 60001)
 # --- logging and eval parameters ---
 log_wandb = True
 
-train_log_interval = 64
-eval_val_interval = 64 # also the printing period
+train_log_interval = 12
+eval_val_interval = 12 # also the printing period
 eval_val_iters = 50
 
 # --- benchmarking parameters ---
@@ -200,7 +204,7 @@ if log_wandb:
                     "optimizer": optimizer,
                     "adam_b1": adam_b1,
                     "adam_b2": adam_b2,
-                    "clip_value_grad": clip_value_grad,
+                    "max_grad_norm": max_grad_norm,
                     "weight_decay": weight_decay,
                     # lr
                     "schedule": schedule,
@@ -230,8 +234,8 @@ val_loader = DataLoader("data/fineweb10B/fineweb_val_*.bin", micro_batch_size, c
 
 grad_acc_steps = total_batch_size // micro_batch_size
 
-# model
 
+# model
 if architecture == "Transformer":
     config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
     #config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
@@ -246,6 +250,7 @@ g = torch.Generator()
 g.manual_seed(seed)
 
 model = LM(config, vocab_size=vocab_size, rng=g).to(device)
+#model = GPT(config).to(device)
 
 if optimizer == "AdamW":
     optim = model.configure_optimizers(weight_decay, lr, (adam_b1, adam_b2), device_type)
@@ -270,6 +275,7 @@ optim = model.configure_optimizers(weight_decay=weight_decay,
                                                device_type=device)
 """
 
+
 if ckpt != "":
     checkpoint = torch.load(ckpt)
     model.load_state_dict(checkpoint["model"])
@@ -287,6 +293,10 @@ print(f"Model initialized. Number of parameters : {sum([p.numel() for p in model
 unoptimized_model = model # the unoptimized model is kept for saving
 if use_torch_compile:
     print("Compiling the model...")
+
+    if hasattr(torch_ind_config, "coordinate_descent_tuning"):
+        torch_ind_config.coordinate_descent_tuning = True
+
     model = torch.compile(model)
     print("Done compiling.")
 
@@ -294,8 +304,6 @@ print("Training is starting.")
 start_time = time.time()
 last_time = start_time
 last_print_time = start_time
-
-torch.cuda.reset_peak_memory_stats(device=None)
 
 try:
     for iter in range(start_iter, num_iters):
@@ -306,21 +314,15 @@ try:
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
             with dtype_ctx:
-                logits = model(x)
-                loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
-                #_, loss = model(x, y, return_logits=False)
+                #logits = model(x)
+                #loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
+                _, loss = model(x, y, return_logits=False)
                 loss = loss / grad_acc_steps
                 loss_total += loss.detach()
 
             loss.backward()
 
-        if clip_value_grad != 0.0:
-            torch.nn.utils.clip_grad_value_(model.parameters(), clip_value=clip_value_grad)
-        
-        # compute grad norm to log it afterwards
-        if iter % train_log_interval == 0:
-            grad_norms = [p.grad.norm() for p in model.parameters() if p.grad is not None]
-            total_grad_norm = torch.sqrt(torch.sum(torch.tensor([gn ** 2 for gn in grad_norms])))
+        norm = torch.nn.utils.clip_grad_value_(model.parameters(), clip_value=max_grad_norm)
         
         optim.step()
         optim.zero_grad(set_to_none=True)
@@ -333,7 +335,7 @@ try:
         # logging : print and wandb
         to_log = {}
         if iter % train_log_interval == 0:
-            to_log.update({"train_loss": loss_total, "grad_norm": total_grad_norm})
+            to_log.update({"train_loss": loss_total, "grad_norm": norm})
 
             curr_time = time.time()
             dt = curr_time - last_time
@@ -357,9 +359,9 @@ try:
                     x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
                     with dtype_ctx:
-                        logits = model(x)
-                        loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
-                        #_, loss = model(x, y, return_logits=False)
+                        #logits = model(x)
+                        #loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
+                        _, loss = model(x, y, return_logits=False)
                     eval_loss += loss.item()
 
                 eval_loss /= eval_val_iters

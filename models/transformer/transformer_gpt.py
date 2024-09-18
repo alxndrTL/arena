@@ -6,8 +6,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from models.transformer.rotary_embedding import RotaryEmbedding
-
 """
 caching is WIP
 """
@@ -57,14 +55,8 @@ class Transformer(nn.Module):
 
         if self.config.pos_emb == "absolute":
             self.PE = nn.Embedding(config.max_len, config.d_model)
-            self.layers = nn.ModuleList([DecoderLayer(config) for _ in range(config.n_layers)])
 
-        elif self.config.pos_emb == "rope":
-            PE = RotaryEmbedding(dim=(self.config.d_model//self.config.n_heads)//2, theta=self.config.rope_theta)
-            self.layers = nn.ModuleList([DecoderLayer(config, PE) for _ in range(config.n_layers)])
-
-        else:
-            raise NotImplementedError
+        self.layers = nn.ModuleList([DecoderLayer(config) for _ in range(config.n_layers)])
         
         self.in_dropout = nn.Dropout(config.dropout)
 
@@ -93,13 +85,13 @@ class Transformer(nn.Module):
             return X, caches
     
 class DecoderLayer(nn.Module):
-    def __init__(self, config: TransformerGPTConfig, rotary_emb: RotaryEmbedding = None):
+    def __init__(self, config: TransformerGPTConfig):
         super().__init__()
 
         self.config = config
 
         self.attention_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
-        self.sa = SelfAttentionMultiHead(config, rotary_emb)
+        self.sa = SelfAttentionMultiHead(config)
         self.mlp_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
         self.mlp = MLP(config)
         
@@ -131,7 +123,7 @@ class MLP(nn.Module):
         return x
 
 class SelfAttentionMultiHead(nn.Module):
-    def __init__(self, config: TransformerGPTConfig, rotary_emb: RotaryEmbedding = None):
+    def __init__(self, config: TransformerGPTConfig):
         super().__init__()
 
         self.config = config
@@ -150,7 +142,6 @@ class SelfAttentionMultiHead(nn.Module):
             self.k_in_v_proj = nn.Linear(config.max_len, config.max_len, bias=False)
 
         # RoPE embedding
-        self.rotary_emb = rotary_emb
 
         if not config.flash or config.super_attn:
             # compute the mask once and for all here 

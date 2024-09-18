@@ -1,0 +1,30 @@
+Run name: yXdLvYYx.
+DataLoader: total number of tokens: 10,255,324,043 across 103 files
+DataLoader: total number of tokens: 100,000,000 across 1 files
+Model initialized. Number of parameters : 123532032.
+LM(
+  (embedding): Embedding(50257, 768)
+  (core): Transformer(
+    (layers): ModuleList(
+      (0-11): 12 x DecoderLayer(
+        (sa): SelfAttentionMultiHead(
+          (c_attn): Linear(in_features=768, out_features=2304, bias=False)
+          (c_proj): Linear(in_features=768, out_features=768, bias=False)
+          (rotary): Rotary()
+        )
+        (mlp): MLP(
+          (fc_1): Linear(in_features=768, out_features=2048, bias=False)
+          (fc_2): Linear(in_features=2048, out_features=768, bias=False)
+          (fc_3): Linear(in_features=768, out_features=2048, bias=False)
+          (dropout): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+    (in_dropout): Dropout(p=0.0, inplace=False)
+  )
+  (lm_head): Linear(in_features=768, out_features=50257, bias=False)
+)
+Traceback (most recent call last):
+  File "/workspace/arena/train.py", line 289, in <module>
+    eeee
+NameError: name 'eeee' is not defined

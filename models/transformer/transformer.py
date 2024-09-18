@@ -6,8 +6,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from models.transformer.rotary_embedding import RotaryEmbedding
-
 """
 caching is WIP
 """
@@ -67,14 +65,8 @@ class Transformer(nn.Module):
 
         if self.config.pos_emb == "absolute":
             self.PE = nn.Embedding(config.max_len, config.d_model)
-            self.layers = nn.ModuleList([DecoderLayer(config) for _ in range(config.n_layers)])
 
-        elif self.config.pos_emb == "rope":
-            PE = RotaryEmbedding(dim=(self.config.d_model//self.config.n_heads)//2, theta=self.config.rope_theta)
-            self.layers = nn.ModuleList([DecoderLayer(config, PE) for _ in range(config.n_layers)])
-
-        else:
-            raise NotImplementedError
+        self.layers = nn.ModuleList([Block(config) for _ in range(config.n_layers)]) # DecoderLayer
         
         self.in_dropout = nn.Dropout(config.dropout)
 
@@ -92,25 +84,39 @@ class Transformer(nn.Module):
             X = self.in_dropout(X)
 
         for i, layer in enumerate(self.layers):
-            X, c = layer(X, caches[i] if caches is not None else None) # (B, L, d_model)
+            X = layer(X, caches[i] if caches is not None else None) # (B, L, d_model)
 
             if caches is not None:
-                caches[i] = c
+                caches[i] = None
         
         if caches is None:
             return X
         else:
             return X, caches
     
+class Block(nn.Module):
+
+    def __init__(self, config):
+        super().__init__()
+        self.attn = SelfAttentionMultiHead(config)
+        self.mlp = MLP(config)
+        self.attn_scale = (1 / math.sqrt(2 * config.n_layers))
+
+    def forward(self, x, cache=None):
+        x = x + self.attn_scale * self.attn(rmsnorm(x))
+        x = x + self.mlp(rmsnorm(x))
+        return x
+
+"""
 class DecoderLayer(nn.Module):
-    def __init__(self, config: TransformerConfig, rotary_emb: RotaryEmbedding = None):
+    def __init__(self, config: TransformerConfig):
         super().__init__()
 
         self.config = config
 
-        self.attention_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
-        self.sa = SelfAttentionMultiHead(config, rotary_emb)
-        self.mlp_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
+        #self.attention_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
+        self.sa = SelfAttentionMultiHead(config)
+        #self.mlp_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
         self.mlp = MLP(config)
         
     def forward(self, X, cache=None):
@@ -119,14 +125,17 @@ class DecoderLayer(nn.Module):
         # Y : (B, L, D)
 
         residual = X
-        X, cache = self.sa(self.attention_norm(X), cache)
+        #X, cache = self.sa(self.attention_norm(X), cache)
+        X, cache = self.sa(rmsnorm(X))
         X = residual + X
-        X = X + self.mlp(self.mlp_norm(X))
+        #X = X + self.mlp(self.mlp_norm(X))
+        X = X + self.mlp(rmsnorm(X))
 
         return X, cache
     
     def get_empty_cache(self, batch_size):
         return (None, None)
+"""
     
 class MLP(nn.Module):
     def __init__(self, config: TransformerConfig):
@@ -140,8 +149,23 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.dropout(self.fc_2(F.silu(self.fc_1(x)) * self.fc_3(x)))
 
+"""
+class MLP(nn.Module):
+    def __init__(self, config: TransformerConfig):
+        super().__init__()
+        self.c_fc    = nn.Linear(config.d_model, 4 * config.d_model, bias=False)
+        self.c_proj  = nn.Linear(4 * config.d_model, config.d_model, bias=False)
+
+    def forward(self, x):
+        x = self.c_fc(x)
+        x = F.gelu(x)
+        x = self.c_proj(x)
+        return x
+"""
+
+"""
 class SelfAttentionMultiHead(nn.Module):
-    def __init__(self, config: TransformerConfig, rotary_emb: RotaryEmbedding = None):
+    def __init__(self, config: TransformerConfig):
         super().__init__()
 
         self.config = config
@@ -247,7 +271,39 @@ class SelfAttentionMultiHead(nn.Module):
         y = self.resid_dropout(self.c_proj(y))
 
         return y, cache
+"""
 
+class SelfAttentionMultiHead(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.n_head = config.n_heads
+        self.n_embd = config.d_model
+        self.head_dim = self.n_embd // self.n_head
+        assert self.n_embd % self.n_head == 0
+        # key, query, value projections for all heads, but in a batch
+        self.c_attn = nn.Linear(self.n_embd, 3 * self.n_embd, bias=False)
+        # output projection
+        self.c_proj = nn.Linear(self.n_embd, self.n_embd, bias=False)
+        self.rotary = Rotary(self.head_dim)
+
+    def forward(self, x, cache=None):
+        B, T, C = x.size() # batch size, sequence length, embedding dimensionality (n_embd)
+        # calculate query, key, values for all heads in batch and move head forward to be the batch dim
+        qkv = self.c_attn(x)
+        q, k, v = qkv.split(self.n_embd, dim=2)
+        k = k.view(B, T, self.n_head, self.head_dim)
+        q = q.view(B, T, self.n_head, self.head_dim)
+        v = v.view(B, T, self.n_head, self.head_dim)
+        cos, sin = self.rotary(q)
+        q = apply_rotary_emb(q, cos, sin)
+        k = apply_rotary_emb(k, cos, sin)
+        y = F.scaled_dot_product_attention(q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2), is_causal=True)
+        y = y.transpose(1, 2).contiguous().view(B, T, C) # re-assemble all head outputs side by side
+        # output projection
+        y = self.c_proj(y)
+        return y
+
+"""
 class RMSNorm(nn.Module):
     def __init__(self, dim: int, eps: float, use_mup: bool):
         super().__init__()
@@ -269,6 +325,12 @@ class RMSNorm(nn.Module):
             return output * self.weight
         else:
             return output
+"""
+
+def rmsnorm(x0, eps=1e-5):
+    x = x0.float()
+    x = x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + eps)
+    return x.type_as(x0)
 
 # taken from modeling_jamba.py (jamba official implementation)
 # the same as the one in llama2.c model.py, but dim of repeat is 1 instead of 2
