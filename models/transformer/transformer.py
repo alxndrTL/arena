@@ -66,7 +66,7 @@ class Transformer(nn.Module):
         if self.config.pos_emb == "absolute":
             self.PE = nn.Embedding(config.max_len, config.d_model)
 
-        self.layers = nn.ModuleList([Block(config) for _ in range(config.n_layers)]) # DecoderLayer
+        self.layers = nn.ModuleList([DecoderLayer(config) for _ in range(config.n_layers)])
         
         self.in_dropout = nn.Dropout(config.dropout)
 
@@ -83,17 +83,12 @@ class Transformer(nn.Module):
         else:
             X = self.in_dropout(X)
 
-        for i, layer in enumerate(self.layers):
-            X = layer(X, caches[i] if caches is not None else None) # (B, L, d_model)
-
-            if caches is not None:
-                caches[i] = None
+        for layer in self.layers:
+            X = layer(X) # (B, L, d_model)
         
-        if caches is None:
-            return X
-        else:
-            return X, caches
+        return X
     
+"""
 class Block(nn.Module):
 
     def __init__(self, config):
@@ -106,36 +101,32 @@ class Block(nn.Module):
         x = x + self.attn_scale * self.attn(rmsnorm(x))
         x = x + self.mlp(rmsnorm(x))
         return x
-
 """
+
 class DecoderLayer(nn.Module):
     def __init__(self, config: TransformerConfig):
         super().__init__()
 
-        self.config = config
+        self.sa_scale = (1 / math.sqrt(2 * config.n_layers))
 
         #self.attention_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
         self.sa = SelfAttentionMultiHead(config)
         #self.mlp_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
         self.mlp = MLP(config)
         
-    def forward(self, X, cache=None):
+    def forward(self, X):
         # X : (B, L, D)
+        # -> Y : (B, L, D)
 
-        # Y : (B, L, D)
-
-        residual = X
         #X, cache = self.sa(self.attention_norm(X), cache)
-        X, cache = self.sa(rmsnorm(X))
-        X = residual + X
+        X = X + self.sa_scale * self.sa(rmsnorm(X))
         #X = X + self.mlp(self.mlp_norm(X))
         X = X + self.mlp(rmsnorm(X))
 
-        return X, cache
+        return X
     
     def get_empty_cache(self, batch_size):
         return (None, None)
-"""
     
 class MLP(nn.Module):
     def __init__(self, config: TransformerConfig):
@@ -148,20 +139,6 @@ class MLP(nn.Module):
 
     def forward(self, x):
         return self.dropout(self.fc_2(F.silu(self.fc_1(x)) * self.fc_3(x)))
-
-"""
-class MLP(nn.Module):
-    def __init__(self, config: TransformerConfig):
-        super().__init__()
-        self.c_fc    = nn.Linear(config.d_model, 4 * config.d_model, bias=False)
-        self.c_proj  = nn.Linear(4 * config.d_model, config.d_model, bias=False)
-
-    def forward(self, x):
-        x = self.c_fc(x)
-        x = F.gelu(x)
-        x = self.c_proj(x)
-        return x
-"""
 
 """
 class SelfAttentionMultiHead(nn.Module):
