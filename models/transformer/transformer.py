@@ -81,21 +81,6 @@ class Transformer(nn.Module):
             X = layer(X) # (B, L, d_model)
         
         return X
-    
-"""
-class Block(nn.Module):
-
-    def __init__(self, config):
-        super().__init__()
-        self.attn = SelfAttentionMultiHead(config)
-        self.mlp = MLP(config)
-        self.attn_scale = (1 / math.sqrt(2 * config.n_layers))
-
-    def forward(self, x, cache=None):
-        x = x + self.attn_scale * self.attn(rmsnorm(x))
-        x = x + self.mlp(rmsnorm(x))
-        return x
-"""
 
 class DecoderLayer(nn.Module):
     def __init__(self, config: TransformerConfig):

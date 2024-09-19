@@ -80,10 +80,6 @@ dropout = 0.
 pos_emb = "rope" # "absolute" or "rope"
 rope_theta = 10000
 
-optimised_attn = False
-efficient_attn = False
-super_attn = False
-
 use_flash_attention = True
 
 # --- muP parameters ---
@@ -174,9 +170,6 @@ if log_wandb:
                     "dropout": dropout,
                     "pos_emb": pos_emb,
                     "rope_theta": rope_theta,
-                    "optimised_attn": optimised_attn or efficient_attn or super_attn,
-                    "efficient_attn": efficient_attn or super_attn,
-                    "super_attn": super_attn,
                     # Mamba2
                     "d_head_m2": d_head,
                     "d_state_m2": d_state,                    
@@ -224,7 +217,7 @@ print(f"Number of micro batches: {grad_acc_steps}")
 
 # model
 if architecture == "Transformer":
-    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
+    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
 elif architecture == "Mamba":
     config = MambaConfig(d_model=d_model, n_layers=n_layers, bias=bias, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, use_cuda=use_cuda)
 elif architecture == "Mamba2":
@@ -287,7 +280,7 @@ try:
 
             loss.backward()
 
-        norm = torch.nn.utils.clip_grad_value_(model.parameters(), clip_value=max_grad_norm)
+        norm = torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
         
         optim.step()
         optim.zero_grad(set_to_none=True)
@@ -313,8 +306,6 @@ try:
 
                 eval_loss /= eval_val_iters
                 model.train()
-            
-            to_log.update({"val_loss": eval_loss})
         
         """
         # eval on downstream tasks
@@ -345,9 +336,12 @@ try:
         to_log = {}
         if iter % train_log_interval == 0:
             tokens_per_s = tokens_per_iter / (t1 - t0)
-            to_log.update({"train_loss": loss_total, "grad_norm": norm}) # todo : norm!!
+            to_log.update({"train_loss": loss_total, "grad_norm": norm})
             to_log.update({"tokens_per_s": tokens_per_s})
 
+        if iter % eval_val_interval == 0:
+            to_log.update({"val_loss": eval_loss})
+            
         if to_log:
             tokens_seen = (iter+1)*ctx_len*total_batch_size
             to_log.update({"lr": lr_iter, "tokens_seen": tokens_seen})
@@ -358,14 +352,18 @@ try:
                 formatted_iter = f"{iter:0{num_digits}d}"
 
                 uptime = time.time() - start_time
-                total_time = ((num_iters-start_iter) * uptime) / (iter+1)
+                total_time = ((num_iters-start_iter) * uptime) / iter if iter>0 else -1
                 eta = total_time - uptime
 
-                print(f"Iter {formatted_iter}/{num_iters}. train loss: {loss_total:.3f}. valid loss: {eval_loss:.3f}. lr: {lr_iter:.5f}. tokens_per_s: {tokens_per_s:.0f}. tokens seen: {tokens_seen}. uptime: {format_time(uptime)}. ETA: {format_time(eta)}")
+                print(f"Iter {formatted_iter}/{num_iters}. train loss: {loss_total:.3f}. valid loss: {eval_loss:.3f}. lr: {lr_iter:.5f}. {tokens_per_s:.0f} tok/s. uptime: {format_time(uptime)}. ETA: {format_time(eta)}")
             
             # logging
             if log_wandb:
                 wandb.log(to_log, step=iter)
+        
+        # skip first step for timing calculations (act as a warm-up)
+        if iter==0:
+            start_time = time.time()
         
 except KeyboardInterrupt:
     print("Training interrupted.")
