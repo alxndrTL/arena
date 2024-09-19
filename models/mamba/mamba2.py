@@ -65,6 +65,7 @@ class Mamba2Config:
     device=None
 
     def __post_init__(self):
+        self.architecture = "Mamba2"
         self.d_inner = self.expand_factor * self.d_model # E*D = ED in comments
         self.n_heads = self.d_inner // self.d_head
         assert self.d_inner % self.d_head == 0

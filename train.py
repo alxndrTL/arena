@@ -135,9 +135,6 @@ train_log_interval = 12
 eval_val_interval = 12 # also the printing period
 eval_val_iters = 50
 
-# --- benchmarking parameters ---
-benchmark = False # if set, disables all the extra features (wandb, eval...) and only prints benchmarks (time per iter, GPU usage...)
-
 # ---------------------------------------------
 
 seed = 123456789 + seed
@@ -156,14 +153,6 @@ torch.backends.cudnn.allow_tf32 = True # allow tf32 on cudnn
 device_type = "cuda" if "cuda" in device else "cpu"
 torch_dtype = {"float32": torch.float32, "float16": torch.float16, "bfloat16": torch.bfloat16}[dtype]
 dtype_ctx = (nullcontext() if device_type == "cpu" else torch.amp.autocast(device_type, torch_dtype))
-
-if benchmark:
-    print("Benchmarking mode enabled.")
-
-    log_wandb = False
-    eval_val_interval = 999999
-    ckpt_interval = 999999
-    eval_interval = 999999
 
 if log_wandb:
     wandb.init(project="arena",
@@ -220,15 +209,18 @@ if log_wandb:
 else:
     run_name = ''.join(random.choice(string.ascii_letters) for _ in range(8))
 
-if not benchmark:
-    save_dir = os.path.join(save_dir, run_name)
-    os.makedirs(save_dir, exist_ok=True)
-    print(f"Run name: {run_name}.")
+save_dir = os.path.join(save_dir, run_name)
+os.makedirs(save_dir, exist_ok=True)
+print(f"Run name: {run_name}.")
 
 train_loader = DataLoader("data/fineweb10B/fineweb_train_*.bin", micro_batch_size, ctx_len, 1, 1)
 val_loader = DataLoader("data/fineweb10B/fineweb_val_*.bin", micro_batch_size, ctx_len, 1, 1)
 
+tokens_per_iter = total_batch_size * ctx_len
 grad_acc_steps = total_batch_size // micro_batch_size
+
+print(f"Tokens processed per iteration: {tokens_per_iter}")
+print(f"Number of micro batches: {grad_acc_steps}")
 
 # model
 if architecture == "Transformer":
@@ -264,25 +256,24 @@ elif schedule == "wsd":
 else:
     raise NotImplementedError
 
-print(f"Model initialized. Number of parameters : {sum([p.numel() for p in model.parameters()])}.")
+num_params = sum([p.numel() for p in model.parameters()])
+print(f"Model initialized. Number of parameters : {num_params}.")
 
 unoptimized_model = model # the unoptimized model is kept for saving
 if use_torch_compile:
-    print("Compiling the model...")
-
     if hasattr(torch_ind_config, "coordinate_descent_tuning"):
         torch_ind_config.coordinate_descent_tuning = True
 
     model = torch.compile(model)
-    print("Done compiling.")
 
 print("Training is starting.")
+
 start_time = time.time()
-last_time = start_time
-last_print_time = start_time
+torch.cuda.reset_peak_memory_stats()
 
 try:
     for iter in range(start_iter, num_iters):
+        t0 = time.time()
 
         loss_total = 0.
         for micro_step in range(grad_acc_steps):
@@ -301,30 +292,14 @@ try:
         optim.step()
         optim.zero_grad(set_to_none=True)
 
+        t1 = time.time()
+
         # lr decay
         scheduler.step()
-        lr_iter = scheduler.get_last_lr()[0] # param group 1 has a "fixed" lr (ie not affected by muP)
-        # TODO : CHANGE TO 1 OR DO SOMETHING
-
-        # logging : print and wandb
-        to_log = {}
-        if iter % train_log_interval == 0:
-            to_log.update({"train_loss": loss_total, "grad_norm": norm})
-
-            curr_time = time.time()
-            dt = curr_time - last_time
-            last_time = curr_time
-
-            time_per_iter = dt / train_log_interval
-
-            to_log.update({"time_per_iter": time_per_iter})
-
-            if benchmark:
-                print(f"avg time_per_iter over the last {train_log_interval} iters: {time_per_iter:.5f}s. used GPU memory : {(torch.cuda.memory_allocated(device=None) / (1024**2)):.0f} MB. max used GPU memory : {(torch.cuda.max_memory_allocated(device=None) / (1024**2)):.0f} MB")
-                torch.cuda.reset_peak_memory_stats(device=None)
+        lr_iter = scheduler.get_last_lr()[1] # param group 1 has a "fixed" lr (ie not affected by muP)
         
         # val loss
-        if (iter % eval_val_interval == 0) and not benchmark:
+        if (iter % eval_val_interval == 0):
             with torch.no_grad():
                 model.eval()
                 eval_loss = 0
@@ -343,7 +318,7 @@ try:
         
         """
         # eval on downstream tasks
-        if (iter % eval_interval == 0) and not benchmark:
+        if (iter % eval_interval == 0):
             with torch.no_grad():
                 model.eval()
                 model_generate = model.setup_generation(sample=False)
@@ -352,27 +327,6 @@ try:
             
             to_log.update({"success": success})
         """
-
-        if to_log:
-            to_log.update({"lr": lr_iter, "tokens_seen": iter*ctx_len*total_batch_size})
-
-            # printing
-            if "val_loss" in to_log:
-                num_digits = len(str(num_iters))
-                formatted_iter = f"{iter:0{num_digits}d}"
-
-                uptime = int(time.time()-start_time)
-
-                total_time = ((time.time()-last_print_time) * num_iters) / eval_val_interval
-                eta = int(total_time - uptime)
-
-                last_print_time = time.time()
-
-                print(f"Iter {formatted_iter}/{num_iters}. train loss : {loss_total:.3f}. valid loss : {eval_loss:.3f}. lr : {lr_iter:.5f}. uptime : {format_time(uptime)}. ETA : {format_time(eta)}.")
-            
-            # logging
-            if log_wandb:
-                wandb.log(to_log, step=iter)
 
         # checkpointing
         if (ckpt_interval and iter % ckpt_interval == 0) or (schedule == "wsd" and (iter == num_iters-lr_decay_iters)):
@@ -386,27 +340,41 @@ try:
             checkpoint = {"model": unoptimized_model.state_dict(),
                           "optimizer": optim.state_dict()}
             torch.save(checkpoint, os.path.join(save_dir, dirname, "model.pth"))
+
+        # logging : print and wandb
+        to_log = {}
+        if iter % train_log_interval == 0:
+            tokens_per_s = tokens_per_iter / (t1 - t0)
+            to_log.update({"train_loss": loss_total, "grad_norm": norm}) # todo : norm!!
+            to_log.update({"tokens_per_s": tokens_per_s})
+
+        if to_log:
+            tokens_seen = (iter+1)*ctx_len*total_batch_size
+            to_log.update({"lr": lr_iter, "tokens_seen": tokens_seen})
+
+            # printing
+            if "val_loss" in to_log:
+                num_digits = len(str(num_iters))
+                formatted_iter = f"{iter:0{num_digits}d}"
+
+                uptime = time.time() - start_time
+                total_time = ((num_iters-start_iter) * uptime) / (iter+1)
+                eta = total_time - uptime
+
+                print(f"Iter {formatted_iter}/{num_iters}. train loss: {loss_total:.3f}. valid loss: {eval_loss:.3f}. lr: {lr_iter:.5f}. tokens_per_s: {tokens_per_s:.0f}. tokens seen: {tokens_seen}. uptime: {format_time(uptime)}. ETA: {format_time(eta)}")
+            
+            # logging
+            if log_wandb:
+                wandb.log(to_log, step=iter)
         
 except KeyboardInterrupt:
     print("Training interrupted.")
-
-if benchmark:
-    sys.exit()
 
 end_time = time.time()
 print(f"Training is done. Took {(end_time-start_time)/60:.2f} minutes.")
 
 # saving : config + model checkpoint (model+optim)
 config_dict = asdict(config)
-
-if isinstance(config, TransformerConfig):
-    config_dict['architecture'] = "Transformer"
-elif isinstance(config, MambaConfig):
-    config_dict['architecture'] = "Mamba"
-elif isinstance(config, Mamba2Config):
-    config_dict['architecture'] = "Mamba2"
-else:
-    raise NotImplementedError
 
 json.dump(config_dict, open(os.path.join(save_dir, 'config.json'), 'w'))
 
@@ -417,11 +385,16 @@ torch.save(checkpoint, os.path.join(save_dir, "model.pth"))
 print(f"Successfully saved checkpoint and config in {save_dir}.")
 
 # final logging (some metrics for wandb)
-num_params = sum([p.numel() for p in model.parameters()])
 
-to_log = {"num_params": num_params, "num_iters": iter,
+#todo : réfléchir à d'autres
+to_log = {"num_params": num_params,
+          "num_iters_done": iter,
           "num_tokens": iter*total_batch_size*ctx_len,
-          "use_torch_compile": use_torch_compile, "use_flash_attn": use_flash_attention, "dtype": dtype}
+          "use_torch_compile": use_torch_compile,
+          "use_flash_attn": use_flash_attention,
+          "peak_memory": torch.cuda.max_memory_allocated() // 1024 // 1024, # MiB
+          "tokens_per_sec": tokens_per_s,
+          "dtype": dtype}
 
 if log_wandb:
     wandb.log(to_log)

@@ -34,6 +34,8 @@ class TransformerConfig:
     flash: bool = True
 
     def __post_init__(self):
+        self.architecture = "Transformer"
+        
         assert self.d_model % self.n_heads == 0, "d_model must be a multiple of n_heads"
         self.d_head = self.d_model // self.n_heads
 
