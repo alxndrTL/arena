@@ -21,7 +21,7 @@ from models.mamba.mamba2 import Mamba2, Mamba2Config
 from models.mamba.mamba import Mamba, MambaConfig
 
 class LM(nn.Module):
-    def __init__(self, model_config: Union[TransformerConfig, MambaConfig, Mamba2Config], vocab_size: int, rng: torch.Generator):
+    def __init__(self, model_config: Union[TransformerConfig, MambaConfig, Mamba2Config], vocab_size: int, rng: torch.Generator = None):
         super().__init__()
 
         self.config = model_config
@@ -43,6 +43,9 @@ class LM(nn.Module):
 
         self.lm_head = nn.Linear(self.config.d_model, self.vocab_size, bias=False)
         self.embedding.weight = self.lm_head.weight
+
+        if rng is None:
+            rng = torch.Generator()
 
         if self.config.mup and isinstance(self.config, TransformerConfig):
             for pn, p in self.named_parameters():
@@ -455,7 +458,7 @@ class LM(nn.Module):
 
         return optimizer
 
-def load_model(load_dir, device="cuda"):
+def load_model(load_dir, vocab_size, device="cuda"):
     config_dir = os.path.join(load_dir, 'config.json')
     checkpoint_dir = os.path.join(load_dir, 'model.pth')
 
@@ -472,7 +475,7 @@ def load_model(load_dir, device="cuda"):
     else:
         raise NotImplementedError
 
-    model = LM(config, vocab_size=52+3).to(device)
+    model = LM(config, vocab_size=vocab_size).to(device)
     checkpoint = torch.load(checkpoint_dir, map_location=device)
     model.load_state_dict(checkpoint['model'])
     model.eval()

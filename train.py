@@ -225,6 +225,10 @@ elif architecture == "Mamba2":
 else:
     raise NotImplementedError
 
+config_dict = asdict(config)
+config_dict['architecture'] = architecture
+json.dump(config_dict, open(os.path.join(save_dir, 'config.json'), 'w'))
+
 g = torch.Generator()
 g.manual_seed(seed)
 
@@ -371,11 +375,7 @@ except KeyboardInterrupt:
 end_time = time.time()
 print(f"Training is done. Took {(end_time-start_time)/60:.2f} minutes.")
 
-# saving : config + model checkpoint (model+optim)
-config_dict = asdict(config)
-
-json.dump(config_dict, open(os.path.join(save_dir, 'config.json'), 'w'))
-
+# saving model checkpoint (model+optim)
 checkpoint = {"model": unoptimized_model.state_dict(),
               "optimizer": optim.state_dict()}
 torch.save(checkpoint, os.path.join(save_dir, "model.pth"))
