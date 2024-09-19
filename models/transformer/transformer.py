@@ -65,7 +65,7 @@ class Transformer(nn.Module):
         
         self.in_dropout = nn.Dropout(config.dropout)
 
-    def forward(self, X, caches=None, seq_pos=0):
+    def forward(self, X, seq_pos=0):
         # X : (B, L, D)
 
         # Y : (B, L, D)

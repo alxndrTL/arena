@@ -17,7 +17,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from models.transformer.transformer import Transformer, TransformerConfig, RMSNorm
-#from models.transformer.transformer_gpt import Transformer, TransformerGPTConfig as TransformerConfig, RMSNorm
 from models.mamba.mamba2 import Mamba2, Mamba2Config
 from models.mamba.mamba import Mamba, MambaConfig
 
@@ -133,7 +132,7 @@ class LM(nn.Module):
                 if pn.endswith('fc_2.weight') or pn.endswith('c_proj.weight') or pn.endswith('mixer.out_proj.weight'):
                     torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std/math.sqrt(2 * self.config.n_layers), generator=self.rng)
 
-    def forward(self, tokens, targets=None, caches=None, return_logits=False, seq_pos=0):
+    def forward(self, tokens, targets=None, caches=None, seq_pos=0):
         # tokens : (B, L)
 
         # logits : (B, L, vocab_size)
@@ -153,9 +152,9 @@ class LM(nn.Module):
         
         if targets is not None:
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1)
-            return None, loss
+            return loss
         else:
-            return None, caches
+            return logits, caches
         
     def generate(self, prompt, num_tokens: int, sample: bool = True, top_k: int = None, temperature: float = 1.0):
         # prompt : (B, L)

@@ -274,7 +274,7 @@ try:
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
             with dtype_ctx:
-                _, loss = model(x, y, return_logits=False)
+                _, loss = model(x, y)
                 loss = loss / grad_acc_steps
                 loss_total += loss.detach()
 
@@ -301,7 +301,7 @@ try:
                     x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
                     with dtype_ctx:
-                        _, loss = model(x, y, return_logits=False)
+                        _, loss = model(x, y)
                     eval_loss += loss.item()
 
                 eval_loss /= eval_val_iters
