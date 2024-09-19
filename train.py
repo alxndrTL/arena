@@ -233,7 +233,6 @@ grad_acc_steps = total_batch_size // micro_batch_size
 # model
 if architecture == "Transformer":
     config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
-    #config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
 elif architecture == "Mamba":
     config = MambaConfig(d_model=d_model, n_layers=n_layers, bias=bias, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, use_cuda=use_cuda)
 elif architecture == "Mamba2":
@@ -245,7 +244,6 @@ g = torch.Generator()
 g.manual_seed(seed)
 
 model = LM(config, vocab_size=vocab_size, rng=g).to(device)
-#model = GPT(config).to(device)
 
 if optimizer == "AdamW":
     optim = model.configure_optimizers(weight_decay, lr, (adam_b1, adam_b2), device_type)
@@ -292,8 +290,6 @@ try:
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
             with dtype_ctx:
-                #logits = model(x)
-                #loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
                 _, loss = model(x, y, return_logits=False)
                 loss = loss / grad_acc_steps
                 loss_total += loss.detach()
@@ -337,8 +333,6 @@ try:
                     x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
                     with dtype_ctx:
-                        #logits = model(x)
-                        #loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
                         _, loss = model(x, y, return_logits=False)
                     eval_loss += loss.item()
 
@@ -348,7 +342,7 @@ try:
             to_log.update({"val_loss": eval_loss})
         
         """
-        # eval accuracy
+        # eval on downstream tasks
         if (iter % eval_interval == 0) and not benchmark:
             with torch.no_grad():
                 model.eval()
@@ -402,7 +396,6 @@ if benchmark:
 end_time = time.time()
 print(f"Training is done. Took {(end_time-start_time)/60:.2f} minutes.")
 
-"""
 # saving : config + model checkpoint (model+optim)
 config_dict = asdict(config)
 
@@ -416,7 +409,6 @@ else:
     raise NotImplementedError
 
 json.dump(config_dict, open(os.path.join(save_dir, 'config.json'), 'w'))
-"""
 
 checkpoint = {"model": unoptimized_model.state_dict(),
               "optimizer": optim.state_dict()}
