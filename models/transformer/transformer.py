@@ -24,10 +24,6 @@ class TransformerConfig:
     
     d_ff: int = None
     n_kv_heads: Optional[int] = None # None=n_heads is MHA, 1 is MQA (multi query attention), in between is GQA (grouped)
-    
-    optimised_attn: bool = False
-    efficient_attn: bool = False
-    super_attn: bool = False # overwrites flash to False
 
     pos_emb: str = "absolute" # absolute, rope
     rope_theta: float = 10000
@@ -47,10 +43,6 @@ class TransformerConfig:
 
         if self.d_ff is None:
             self.d_ff = 4*self.d_model
-
-        # eff/opt/super attn
-        self.optimised_attn = self.optimised_attn or self.efficient_attn or self.super_attn
-        self.efficient_attn = self.efficient_attn or self.super_attn
 
         # muP
         if self.mup:
@@ -149,16 +141,8 @@ class SelfAttentionMultiHead(nn.Module):
 
         # key, query, value projections for all heads
         self.query_proj = nn.Linear(config.d_model, config.n_heads * config.d_head, bias=False) # d_query = n_heads*d_head = d_model as in the Transformer paper
-
-        if not self.config.efficient_attn:
-            self.key_proj = nn.Linear(config.d_model, config.n_kv_heads * config.d_head, bias=False)
-
-        if not self.config.optimised_attn:
-            self.value_proj = nn.Linear(config.d_model, config.n_kv_heads * config.d_head, bias=False)
-
-        # LxL super attention matrix params
-        if config.super_attn:
-            self.k_in_v_proj = nn.Linear(config.max_len, config.max_len, bias=False)
+        self.key_proj = nn.Linear(config.d_model, config.n_kv_heads * config.d_head, bias=False)
+        self.value_proj = nn.Linear(config.d_model, config.n_kv_heads * config.d_head, bias=False)
 
         # RoPE embedding
         #self.rotary_emb = rotary_emb
@@ -220,27 +204,20 @@ class SelfAttentionMultiHead(nn.Module):
             Q, K = self.rotary_emb.rotate_queries_with_cached_keys(Q, K)
 
         # GQA : expand K and V to compute standard attention
-        if not self.config.efficient_attn:
-            K = repeat_kv(K, self.config.kv_rep)
-        if not self.config.optimised_attn:
-            V = repeat_kv(V, self.config.kv_rep)
+        K = repeat_kv(K, self.config.kv_rep)
+        V = repeat_kv(V, self.config.kv_rep)
 
         # attn computation (torch or manual)
         scale = self.config.mup_attn_mult/self.config.d_head if self.config.mup else 1/math.sqrt(self.config.d_head)
 
-        if self.config.flash and not self.config.super_attn:
+        if self.config.flash:
             attention = F.scaled_dot_product_attention(Q, K, V, attn_mask=None, dropout_p=self.config.dropout if self.training else 0, is_causal=not(L==1), scale=scale)
         else:
             QK_T = Q @ torch.transpose(K, 2, 3) # (B, n_heads, L, L)
             QK_T = QK_T + self.mask[:, :, :L, :L]
 
             attention_scores = torch.softmax(scale * QK_T, dim=3) # (B, n_heads, L, L)
-
-            if self.config.super_attn:
-                assert L == self.config.max_len, "Super Attention only currently supports a seq len of max_len"
-                attention = self.attn_drop(attention_scores) @ self.k_in_v_proj.weight[:L, :L] @ V # (B, n_h, L, d_value=d_head)
-            else:
-                attention = self.attn_drop(attention_scores) @ V # (B, n_h, L, d_value=d_head)
+            attention = self.attn_drop(attention_scores) @ V # (B, n_h, L, d_value=d_head)
 
         attention = attention.transpose(1, 2) # (B, L, n_heafs, d_head)
         y = attention.contiguous().view(B, L, self.config.d_model) # n_heads * d_head = d_model
