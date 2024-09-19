@@ -36,15 +36,10 @@ import torch._inductor.config as torch_ind_config
 
 from utils.lr_schedules import cosine_warmup_schedule, wsd_schedule
 
-#from models_bis.lm import LM
-#from models_bis.transformer.transformer import TransformerConfig # GPT
 from models.lm import LM
 from models.transformer.transformer import TransformerConfig
 from models.mamba.mamba import MambaConfig
 from models.mamba.mamba2 import Mamba2Config
-
-#from train_gpt2 import GPTConfig, GPT
-from train_llama3 import ModelArgs, Transformer as TransformerLLAMA
 
 from data.dataloader import DataLoader
 
@@ -258,30 +253,6 @@ elif optimizer == "Adam-mini": # todo : mup
     raise NotImplementedError
 else:
     raise NotImplementedError
-
-"""
-num_vocab = vocab_size
-model_config = {
-        "d12": GPTConfig(vocab_size=num_vocab, n_layer=12, n_head=12, n_embd=768),
-        "d24": GPTConfig(vocab_size=num_vocab, n_layer=24, n_head=16, n_embd=1024),
-        "d36": GPTConfig(vocab_size=num_vocab, n_layer=36, n_head=20, n_embd=1280),
-        "d48": GPTConfig(vocab_size=num_vocab, n_layer=48, n_head=25, n_embd=1600),
-}["d12"]
-model = GPT(model_config)
-model = model.train().cuda()
-
-optim = model.configure_optimizers(weight_decay=weight_decay,
-                                               learning_rate=lr, betas=(0.9, 0.95),
-                                               device_type=device)
-"""
-
-"""
-config = ModelArgs(dim=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, vocab_size=vocab_size,
-                   hidden_dim=d_ff, multiple_of=1, max_seq_len=ctx_len)
-model = TransformerLLAMA(config).train().cuda()
-
-optim = model.configure_optimizers(weight_decay, lr, (adam_b1, adam_b2), device_type)
-"""
 
 if ckpt != "":
     checkpoint = torch.load(ckpt)

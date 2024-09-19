@@ -373,17 +373,6 @@ class LM(nn.Module):
         self.train()
 
         return prompt[:, -num_tokens:]
-        
-    def forward_up_to(self, tokens, layer):
-        # tokens : (B, L)
-        # layer (1->n_layers): will stop the forward pass just after this layer
-
-        # x : (B, L, D) activations after {layer}
-
-        x = self.embedding(tokens)
-        x = self.core(x, stop_at_layer=layer)
-
-        return x
     
     # non-muP init
     # taken from llama2.c
@@ -395,11 +384,6 @@ class LM(nn.Module):
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std, generator=self.rng)
 
-    """
-    def configure_optimizers(self, weight_decay, learning_rate, betas, device_type):
-        optimizer = torch.optim.AdamW(self.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=betas)
-        return optimizer
-    """
     # adapted from llama2.c, with muP
     def configure_optimizers(self, weight_decay, learning_rate, betas, device_type):
         param_dict = {pn: p for pn, p in self.named_parameters()}
