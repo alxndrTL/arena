@@ -61,20 +61,20 @@ ctx_len = 1024
 architecture = "Transformer" # "Transformer" or "Mamba" or "Mamba2"
 d_model = 768
 n_layers = 12
-bias = False
 base_std = 0.02
 
 # Mamba specific
 use_cuda = True # choose True if you can (mamba-ssm installed). else, fallbacks to mamba.py (https://github.com/alxndrTL/mamba.py)
 
 # Mamba2 specific
+bias = False
 d_head = 64
 d_state = 128
 
 # Transformer specific
 d_ff = 2048
 n_heads = 12
-n_kv_heads = n_heads # n_heads is MHA, 1 is MQA (multi query attention), in between is GQA (grouped query attention)
+n_kv_heads = 12 # n_heads is MHA, 1 is MQA (multi query), in between is GQA (grouped query attention)
 dropout = 0.
 
 pos_emb = "rope" # "absolute" or "rope"
@@ -125,7 +125,7 @@ ckpt = "" # if you want to restart training from a checkpoint (path/to/model.pth
 start_iter = 0 # specify starting iter (if loading from ckpt_60000, put 60001)
 
 # --- logging and eval parameters ---
-log_wandb = True
+log_wandb = False
 
 train_log_interval = 12
 eval_val_interval = 12 # also the printing period
@@ -217,7 +217,7 @@ print(f"Number of micro batches: {grad_acc_steps}")
 
 # model
 if architecture == "Transformer":
-    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
+    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, dropout=dropout, max_len=ctx_len, flash=use_flash_attention)
 elif architecture == "Mamba":
     config = MambaConfig(d_model=d_model, n_layers=n_layers, bias=bias, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, use_cuda=use_cuda)
 elif architecture == "Mamba2":
