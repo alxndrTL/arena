@@ -4,3 +4,4 @@ wandb/
 data/fineweb10B
 pylog124M/
 logs/
+nohup.out

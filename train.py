@@ -52,7 +52,7 @@ from utils.misc import format_time
 
 # ---------------------------------------------
 
-seed = 5 # 0, 1, 2...
+seed = 0 # 0, 1, 2...
 
 # --- downstream eval parameters ---
 #eval_interval = 1000
@@ -235,7 +235,6 @@ val_loader = DataLoader("data/fineweb10B/fineweb_val_*.bin", micro_batch_size, c
 
 grad_acc_steps = total_batch_size // micro_batch_size
 
-"""
 # model
 if architecture == "Transformer":
     config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, optimised_attn=optimised_attn, efficient_attn=efficient_attn, super_attn=super_attn, dropout=dropout, bias=bias, max_len=ctx_len, flash=use_flash_attention)
@@ -259,7 +258,6 @@ elif optimizer == "Adam-mini": # todo : mup
     raise NotImplementedError
 else:
     raise NotImplementedError
-"""
 
 """
 num_vocab = vocab_size
@@ -277,11 +275,13 @@ optim = model.configure_optimizers(weight_decay=weight_decay,
                                                device_type=device)
 """
 
+"""
 config = ModelArgs(dim=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, vocab_size=vocab_size,
                    hidden_dim=d_ff, multiple_of=1, max_seq_len=ctx_len)
 model = TransformerLLAMA(config).train().cuda()
 
 optim = model.configure_optimizers(weight_decay, lr, (adam_b1, adam_b2), device_type)
+"""
 
 if ckpt != "":
     checkpoint = torch.load(ckpt)
