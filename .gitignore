@@ -3,3 +3,4 @@ runs/
 wandb/
 data/fineweb10B
 *.out
+*.png

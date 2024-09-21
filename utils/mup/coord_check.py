@@ -167,7 +167,7 @@ def _record_coords(records, width, modulename, t,
 
     return f
 
-def _get_coord_data(models, dataloader, optcls, nsteps=5,
+def _get_coord_data(models, dataloader, optcls, dtype_ctx, nsteps=5,
                 dict_in_out=False, flatten_input=False, flatten_output=False, 
                 output_name='loss', lossfn='xent', filter_module_by_name=None,
                 fix_data=True, cuda=True, nseeds=1, 
@@ -272,7 +272,9 @@ def _get_coord_data(models, dataloader, optcls, nsteps=5,
                             param_fdict=param_fdict)))
                     data, target = batch
                     data, target = data.cuda(), target.cuda()
-                    loss = model(data)
+
+                    with dtype_ctx:
+                        loss = model(data, target)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -289,7 +291,7 @@ def _get_coord_data(models, dataloader, optcls, nsteps=5,
     return pd.DataFrame(df)
 
 
-def get_coord_data(models, dataloader, optcls, nsteps, **kwargs):
+def get_coord_data(models, dataloader, optcls, dtype_ctx, nsteps, **kwargs):
     '''Get coord data for coord check.
 
     Train the models in `models` with data from `dataloader` and optimizer
@@ -372,7 +374,7 @@ def get_coord_data(models, dataloader, optcls, nsteps, **kwargs):
         behavior by setting `one_hot_target=True`.
     '''
     
-    data = _get_coord_data(models, dataloader, optcls, nsteps, **kwargs)
+    data = _get_coord_data(models, dataloader, optcls, dtype_ctx, nsteps, **kwargs)
     return data
 
 

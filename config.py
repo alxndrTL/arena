@@ -44,7 +44,7 @@ rope_theta = 10000
 use_flash_attention = True
 
 # --- muP parameters ---
-use_mup = False
+use_mup = True
 mup_base_width = 288
 
 # --- training parameters ---

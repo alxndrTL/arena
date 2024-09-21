@@ -49,19 +49,19 @@ class LM(nn.Module):
 
         if self.config.mup and isinstance(self.config, TransformerConfig):
             for pn, p in self.named_parameters():
-                if any(pn.endswith(w) for w in ['sa.key_proj.weight','sa.value_proj.weight', 'sa.c_proj.weight', 'mlp.fc_1.weight', 'mlp.fc_2.weight', 'mlp.fc_3.weight']):
+                if any(pn.endswith(w) for w in ['sa.c_attn.weight', 'sa.c_proj.weight', 'mlp.fc_1.weight', 'mlp.fc_2.weight', 'mlp.fc_3.weight']):
                     std = self.config.base_std
 
-                    if any(pn.endswith(w) for w in ['sa.c_proj.weight', 'mlp.fc_3.weight']):
+                    if any(pn.endswith(w) for w in ['sa.c_proj.weight', 'mlp.fc_2.weight']):
                         std = std / math.sqrt(2 * self.config.n_layers)
                     
                     torch.nn.init.normal_(p, mean=0.0, std=std / math.sqrt(self.config.mup_width_mult), generator=self.rng)
-                elif pn.endswith('sa.query_proj.weight'):
-                    torch.nn.init.zeros_(p) # init query proj to zeros
+
+                    if pn.endswith('sa.c_attn.weight'):
+                        torch.nn.init.zeros_(p[self.config.d_model:]) # init query proj to 0
+
                 elif pn == "embedding.weight":
                     torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std, generator=self.rng)
-                elif pn == "lm_head.weight":
-                    torch.nn.init.zeros_(p)
                 elif pn == "core.PE.weight":
                     torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std, generator=self.rng)
                 else:
@@ -392,13 +392,13 @@ class LM(nn.Module):
         param_dict = {pn: p for pn, p in param_dict.items() if p.requires_grad}
 
         if self.config.mup and isinstance(self.config, TransformerConfig):
-            mup_params_keys = set([pn for pn in param_dict.keys() if any(pn.endswith(w) for w in ['sa.query_proj.weight', 'sa.key_proj.weight','sa.value_proj.weight', 'sa.c_proj.weight', 'mlp.fc_1.weight', 'mlp.fc_2.weight', 'mlp.fc_3.weight'])])
+            mup_params_keys = set([pn for pn in param_dict.keys() if any(pn.endswith(w) for w in ['sa.c_attn.weight', 'sa.c_proj.weight', 'mlp.fc_1.weight', 'mlp.fc_2.weight', 'mlp.fc_3.weight'])])
             dim2_params_keys = set([pn for pn in param_dict.keys() if param_dict[pn].dim() >= 2])
 
-            assert dim2_params_keys.difference(mup_params_keys) == ({'embedding.weight', 'lm_head.weight'} if self.config.pos_emb == "rope" else {'embedding.weight', 'lm_head.weight', 'core.PE.weight'})
+            assert dim2_params_keys.difference(mup_params_keys) == ({'embedding.weight'} if self.config.pos_emb == "rope" else {'embedding.weight', 'core.PE.weight'})
             assert mup_params_keys.difference(dim2_params_keys) == set()
 
-            dim2_params_keys = dim2_params_keys.difference(mup_params_keys) # only biases, embd and lm_head left
+            dim2_params_keys = dim2_params_keys.difference(mup_params_keys) # only biases and embd left
 
             mup_parameters = [p for n, p in param_dict.items() if n in mup_params_keys]
             decay_params = [p for n, p in param_dict.items() if n in dim2_params_keys]
