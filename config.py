@@ -44,11 +44,11 @@ rope_theta = 10000
 use_flash_attention = True
 
 # --- muP parameters ---
-use_mup = True
+use_mup = False
 mup_base_width = 288
 
 # --- training parameters ---
-num_iters = 9536
+num_iters = 9536 # 4768 # 2.5B tokens
 total_batch_size = 512
 micro_batch_size = 16
 
@@ -58,13 +58,13 @@ optimizer = "AdamW" # "AdamW" or "Adam-mini"
 schedule = "wsd" # "cosine" or "wsd"
 
 lr = 1.8e-3
-lr_warmup_iters = 256
+lr_warmup_iters = 200
 
 # cosine schedule specific
 lr_min = 1.8e-4
 
 # wsd schedule specific
-lr_decay_iters = 2048 # 10-20% of num_iters
+lr_decay_iters = 1000 # 10-20% of num_iters
 
 adam_b1 = 0.9
 adam_b2 = 0.95
