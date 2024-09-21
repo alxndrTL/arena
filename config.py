@@ -59,7 +59,7 @@ adam_b1 = 0.9
 adam_b2 = 0.95
 
 # Ademamix specific (we set T_alpha_beta3 to T)
-adam_b3 = 0.999 # heuristic : half of informations comes from last ln(0.5)/ln(b3) gradients
+adam_b3 = 0.999 # heuristic: half of informations comes from last ln(0.5)/ln(b3) gradients
 alpha = 5
 
 # LR and scheduler
