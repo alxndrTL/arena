@@ -1,3 +1,10 @@
+"""
+Runs a coord check on the model defined in config.py.
+Data is dummy.
+"""
+
+# todo : mamba et mamba2
+
 import os
 from contextlib import nullcontext
 
@@ -9,13 +16,10 @@ import torch._inductor.config as torch_ind_config
 
 from models.lm import LM
 
-#from data.dataloader import DataLoader
 from utils.mup.coord_check import get_coord_data, plot_coord_data
 from config import *
 
-# todo : torch.compile
-
-# -------------
+# --------------------------
 
 output_dir = ""
 
@@ -28,7 +32,7 @@ max_value = 100
 widths = [64, 128, 256, 512, 768]
 # check that for all these widths, d_model is divisible by d_head
 
-# -------------
+# --------------------------
 
 d_head_0 = config.d_head # fixed through scaling
 config.mup_base_width = widths[0]
