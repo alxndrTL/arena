@@ -52,7 +52,11 @@ num_iters = 9536 # 4768 # 2.5B tokens
 total_batch_size = 512
 micro_batch_size = 16
 
-optimizer = "AdamW" # "AdamW" or "Adam-mini"
+optimizer = "AdamW" # "AdamW" or "Ademamix"
+
+# Ademamix specific (we set T_alpha_beta3 to T)
+adam_b3 = 0.999 # heuristic : half of informations comes from last ln(0.5)/ln(b3) gradients
+alpha = 5
 
 # LR and scheduler
 schedule = "wsd" # "cosine" or "wsd"

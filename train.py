@@ -129,12 +129,7 @@ g.manual_seed(seed)
 
 model = LM(config, vocab_size=vocab_size, rng=g).to(device)
 
-if optimizer == "AdamW":
-    optim = model.configure_optimizers(weight_decay, lr, (adam_b1, adam_b2), device_type)
-elif optimizer == "Adam-mini": # todo : mup
-    raise NotImplementedError
-else:
-    raise NotImplementedError
+optim = model.configure_optimizers(optimizer, weight_decay, lr, (adam_b1, adam_b2), device_type, beta3=adam_b3, alpha=alpha, T_ab3=num_iters)
 
 if ckpt != "":
     checkpoint = torch.load(ckpt)

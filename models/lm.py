@@ -20,6 +20,8 @@ from models.transformer.transformer import Transformer, TransformerConfig, RMSNo
 from models.mamba.mamba2 import Mamba2, Mamba2Config
 from models.mamba.mamba import Mamba, MambaConfig
 
+from optims.ademamix import AdEMAMix
+
 class LM(nn.Module):
     def __init__(self, model_config: Union[TransformerConfig, MambaConfig, Mamba2Config], vocab_size: int, rng: torch.Generator = None):
         super().__init__()
@@ -387,7 +389,7 @@ class LM(nn.Module):
             torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std, generator=self.rng)
 
     # adapted from llama2.c, with muP
-    def configure_optimizers(self, weight_decay, learning_rate, betas, device_type):
+    def configure_optimizers(self, optimizer, weight_decay, learning_rate, betas, device_type, beta3=None, alpha=None, T_ab3=None):
         param_dict = {pn: p for pn, p in self.named_parameters()}
         param_dict = {pn: p for pn, p in param_dict.items() if p.requires_grad}
 
@@ -451,10 +453,20 @@ class LM(nn.Module):
                 {'params': nodecay_params, 'weight_decay': 0.0, 'lr': learning_rate}
             ]
 
-        # Create AdamW optimizer and use the fused version if it is available
-        fused_available = 'fused' in inspect.signature(torch.optim.AdamW).parameters
-        use_fused = fused_available and device_type == 'cuda'
-        optimizer = torch.optim.AdamW(optim_groups, betas=betas, fused=use_fused)
+        if optimizer == "Adam":
+            # Create AdamW optimizer and use the fused version if it is available
+            fused_available = 'fused' in inspect.signature(torch.optim.AdamW).parameters
+            use_fused = fused_available and device_type == 'cuda'
+            optimizer = torch.optim.AdamW(optim_groups, betas=betas, fused=use_fused)
+        
+        elif optimizer == "Ademamix":
+            assert beta3 is not None, "beta3 needs to be specifided for Ademamix"
+            assert alpha is not None, "alpha needs to be specifided for Ademamix"
+            assert T_ab3 is not None, "T_ab3 needs to be specifided for Ademamix"
+            optimizer = AdEMAMix(optim_groups, lr=learning_rate, betas=betas, weight_decay=weight_decay, alpha=alpha, T_ab3=T_ab3)
+
+        else:
+            raise NotImplementedError
 
         return optimizer
 
