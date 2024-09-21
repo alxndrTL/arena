@@ -200,18 +200,6 @@ try:
 
                 eval_loss /= eval_val_iters
                 model.train()
-        
-        """
-        # eval on downstream tasks
-        if (iter % eval_interval == 0):
-            with torch.no_grad():
-                model.eval()
-                model_generate = model.setup_generation(sample=False)
-
-                model.train()
-            
-            to_log.update({"success": success})
-        """
 
         # checkpointing
         if (ckpt_interval and iter % ckpt_interval == 0) or (schedule == "wsd" and (iter == num_iters-lr_decay_iters)):
@@ -246,7 +234,7 @@ try:
                 formatted_iter = f"{iter:0{num_digits}d}"
 
                 uptime = time.time() - start_time
-                total_time = ((num_iters-start_iter) * uptime) / iter if iter>0 else -1
+                total_time = ((num_iters-start_iter) * uptime) / (iter-start_iter) if iter>start_iter else -1
                 eta = total_time - uptime
 
                 print(f"Iter {formatted_iter}/{num_iters}. train loss: {loss_total:.3f}. valid loss: {eval_loss:.3f}. lr: {lr_iter:.5f}. {tokens_per_s:.0f} tok/s. uptime: {format_time(uptime)}. ETA: {format_time(eta)}")
@@ -256,7 +244,7 @@ try:
                 wandb.log(to_log, step=iter)
         
         # skip first step for timing calculations (act as a warm-up)
-        if iter==0:
+        if iter==start_iter:
             start_time = time.time()
         
 except KeyboardInterrupt:
