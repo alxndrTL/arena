@@ -453,7 +453,7 @@ class LM(nn.Module):
                 {'params': nodecay_params, 'weight_decay': 0.0, 'lr': learning_rate}
             ]
 
-        if optimizer == "Adam":
+        if optimizer == "AdamW":
             # Create AdamW optimizer and use the fused version if it is available
             fused_available = 'fused' in inspect.signature(torch.optim.AdamW).parameters
             use_fused = fused_available and device_type == 'cuda'
@@ -463,7 +463,7 @@ class LM(nn.Module):
             assert beta3 is not None, "beta3 needs to be specifided for Ademamix"
             assert alpha is not None, "alpha needs to be specifided for Ademamix"
             assert T_ab3 is not None, "T_ab3 needs to be specifided for Ademamix"
-            optimizer = AdEMAMix(optim_groups, lr=learning_rate, betas=betas, weight_decay=weight_decay, alpha=alpha, T_ab3=T_ab3)
+            optimizer = AdEMAMix(optim_groups, lr=learning_rate, betas=betas+(beta3,), weight_decay=weight_decay, alpha=alpha, T_alpha_beta3=T_ab3)
 
         else:
             raise NotImplementedError

@@ -48,19 +48,9 @@ use_mup = False
 mup_base_width = 288
 
 # --- training parameters ---
-num_iters = 9536 # 4768 # 2.5B tokens
+num_iters = 4768 # 2.5B tokens
 total_batch_size = 512
 micro_batch_size = 16
-
-optimizer = "AdamW" # "AdamW" or "Ademamix"
-
-weight_decay = 0.1
-adam_b1 = 0.9
-adam_b2 = 0.95
-
-# Ademamix specific (we set T_alpha_beta3 to T)
-adam_b3 = 0.999 # heuristic: half of informations comes from last ln(0.5)/ln(b3) gradients
-alpha = 5
 
 # LR and scheduler
 schedule = "wsd" # "cosine" or "wsd"
@@ -73,6 +63,17 @@ lr_min = 1.8e-4
 
 # wsd schedule specific
 lr_decay_iters = 1000 # 10-20% of num_iters
+
+optimizer = "Ademamix" # "AdamW" or "Ademamix"
+
+weight_decay = 0.1
+adam_b1 = 0.9
+adam_b2 = 0.95
+
+# Ademamix specific (we set T_alpha_beta3 to T)
+adam_b3 = 0.999 # heuristic: half of informations comes from last ln(0.5)/ln(b3) gradients
+alpha = 5
+T_ab3 = num_iters - lr_decay_iters
 
 max_grad_norm = 1.0
 

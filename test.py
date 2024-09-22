@@ -22,7 +22,7 @@ ctx_len = 1024
 
 batch_size = 16
 
-load_dir = "runs/drawn-dew-108/"
+load_dir = "runs/dry-pine-115/ckpt_3768_before_cooldown/"
 
 device = "cuda" # "cpu", "cuda:0", "cuda:1", ...
 dtype = "bfloat16" # "float32" or "bfloat16"

@@ -86,14 +86,15 @@ class AdEMAMix(Optimizer):
             bias_correction1 = 1 - beta1 ** step
             bias_correction2 = 1 - beta2 ** step
 
-            if T_alpha_beta3 is not None:
-                alpha_t = min(step * alpha / T_alpha_beta3, alpha)
-                beta3_t = min(math.exp(math.log(beta1) * math.log(beta3) / 
-                              ((1 - step / T_alpha_beta3) * math.log(beta3) + 
-                               (step / T_alpha_beta3) * math.log(beta1))), beta3)
-            else:
-                alpha_t = alpha
-                beta3_t = beta3
+            #if T_alpha_beta3 is not None:
+            #    alpha_t = min(step * alpha / T_alpha_beta3, alpha)
+            #    beta3_t = min(math.exp(math.log(beta1) * math.log(beta3) / ((1 - step / T_alpha_beta3) * math.log(beta3) + (step / T_alpha_beta3) * math.log(beta1))), beta3)
+            #else:
+            #    alpha_t = alpha
+            #    beta3_t = beta3
+
+            alpha_t = alpha
+            beta3_t = beta3
 
             # Decay the first and second moment running average coefficient
             exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)

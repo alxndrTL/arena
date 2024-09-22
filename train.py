@@ -22,6 +22,7 @@ from contextlib import nullcontext
 from dataclasses import asdict
 import json
 import random
+import math
 import numpy as np
 import time
 import wandb
@@ -153,6 +154,17 @@ if use_torch_compile:
 
     model = torch.compile(model)
 
+# todo : move
+def alpha_scheduler(step):
+    if step < T_ab3:
+        return min(step * alpha / T_ab3, alpha)
+    elif T_ab3 <= step <= num_iters:
+        return alpha * (num_iters-step)/lr_decay_iters
+    else:
+        return 0
+def beta3_scheduler(step):
+    return min(math.exp(math.log(adam_b1) * math.log(adam_b3) / ((1 - step / T_ab3) * math.log(adam_b3) + (step / T_ab3) * math.log(adam_b1))), adam_b3)
+
 print("Training is starting.")
 
 start_time = time.time()
@@ -184,6 +196,12 @@ try:
         # lr decay
         scheduler.step()
         lr_iter = scheduler.get_last_lr()[1] # param group 1 has a "fixed" lr (ie not affected by muP)
+
+        # alpha & beta3 update
+        for pg in optim.param_groups:
+            pg['alpha'] = alpha_scheduler(iter)
+            (b1, b2, b3) = pg['betas']
+            pg['betas'] = (b1, b2, beta3_scheduler(iter))
         
         # val loss
         if (iter % eval_val_interval == 0):
@@ -220,6 +238,10 @@ try:
             tokens_per_s = tokens_per_iter / (t1 - t0)
             to_log.update({"train_loss": loss_total, "grad_norm": norm})
             to_log.update({"tokens_per_s": tokens_per_s})
+
+            ademamix_alpha = optim.param_groups[0]['alpha']
+            ademamix_beta3 = optim.param_groups[0]['beta3']
+            to_log.update({"ademamix_alpha": ademamix_alpha, "ademamix_beta": ademamix_beta3})
 
         if iter % eval_val_interval == 0:
             to_log.update({"val_loss": eval_loss})
