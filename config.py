@@ -73,7 +73,6 @@ adam_b2 = 0.95
 # Ademamix specific (we set T_alpha_beta3 to T)
 adam_b3 = 0.999 # heuristic: half of informations comes from last ln(0.5)/ln(b3) gradients
 alpha = 5
-T_ab3 = num_iters - lr_decay_iters
 
 max_grad_norm = 1.0
 
