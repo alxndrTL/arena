@@ -240,7 +240,7 @@ try:
             to_log.update({"tokens_per_s": tokens_per_s})
 
             ademamix_alpha = optim.param_groups[0]['alpha']
-            ademamix_beta3 = optim.param_groups[0]['beta3']
+            ademamix_beta3 = optim.param_groups[0]['betas'][2]
             to_log.update({"ademamix_alpha": ademamix_alpha, "ademamix_beta": ademamix_beta3})
 
         if iter % eval_val_interval == 0:
