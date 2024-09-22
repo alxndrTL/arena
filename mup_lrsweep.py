@@ -45,7 +45,7 @@ ctx_length = 256
 architecture = "Transformer"
 
 base_width = 64
-widths = [256, 512, 768] # check that for all these widths, d_model is divisible by d_head
+widths = [64, 256] # check that for all these widths, d_model is divisible by d_head
 n_layers = 4
 d_head = 64
 
@@ -120,7 +120,7 @@ def run_experiment(type_: Literal["SP", "μP"], width: int, lr: float) -> List[D
     model = torch.compile(model)
     model.train()
 
-    optim = model.configure_optimizers(weight_decay=weight_decay, learning_rate=lr, betas=(adam_b1, adam_b2), device_type=device)
+    optim = model.configure_optimizers(optimizer="AdamW", weight_decay=weight_decay, learning_rate=lr, betas=(adam_b1, adam_b2), device_type=device)
 
     if schedule == "cosine":
         scheduler = lr_scheduler.LambdaLR(optim, cosine_warmup_schedule(lr=lr, lr_min=lr/10, warmup_iters=lr_warmup_iters, num_iters=num_iters, start_iter=0))
