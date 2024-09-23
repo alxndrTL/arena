@@ -31,12 +31,12 @@ from utils.lr_schedules import cosine_warmup_schedule, wsd_schedule
 
 # --------------------------
 
-filename = "transformer2.results.json"
-fig_name = "transformer2.png"
+filename = "transformer.results.json"
+fig_name = "transformer.png"
 
 type_to_lr_range = {
-    #"SP": [2**n for n in range(-20, -18 + 1)],
-    "μP": [2**n for n in range(-9, -7 + 1)],
+    #"SP": [2**n for n in range(-13, -11 + 1)],
+    "μP": [2**n for n in range(-9, -6 + 1)],
 }
 
 ctx_length = 256
@@ -45,7 +45,7 @@ ctx_length = 256
 architecture = "Transformer"
 
 base_width = 64
-widths = [64, 256] # check that for all these widths, d_model is divisible by d_head
+widths = [768] # check that for all these widths, d_model is divisible by d_head
 n_layers = 4
 d_head = 64
 
@@ -58,7 +58,7 @@ num_iters = 2500
 lr_warmup_iters = 100
 lr_warmdown_iters = 500
 
-schedule = "wsd" # "cosine" or "wsd"
+schedule = "cosine" # "cosine" or "wsd"
 
 adam_b1 = 0.9
 adam_b2 = 0.95
