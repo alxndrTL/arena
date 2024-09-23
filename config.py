@@ -53,18 +53,18 @@ total_batch_size = 512
 micro_batch_size = 16
 
 # LR and scheduler
-schedule = "wsd" # "cosine" or "wsd"
+schedule = "cosine" # "cosine" or "wsd"
 
-lr = 1.8e-3
+lr = 3.6e-3
 lr_warmup_iters = 200
 
 # cosine schedule specific
-lr_min = 1.8e-4
+lr_min = lr/10
 
 # wsd schedule specific
 lr_decay_iters = 1000 # 10-20% of num_iters
 
-optimizer = "Ademamix" # "AdamW" or "Ademamix"
+optimizer = "AdamW" # "AdamW" or "Ademamix" or "AdamWScheduleFree"
 
 weight_decay = 0.1
 adam_b1 = 0.9

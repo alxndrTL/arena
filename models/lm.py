@@ -21,6 +21,7 @@ from models.mamba.mamba2 import Mamba2, Mamba2Config
 from models.mamba.mamba import Mamba, MambaConfig
 
 from optims.ademamix import AdEMAMix
+from optims.adamw_schedulefree import AdamWScheduleFree
 
 class LM(nn.Module):
     def __init__(self, model_config: Union[TransformerConfig, MambaConfig, Mamba2Config], vocab_size: int, rng: torch.Generator = None):
@@ -464,6 +465,11 @@ class LM(nn.Module):
             assert alpha is not None, "alpha needs to be specifided for Ademamix"
             assert T_ab3 is not None, "T_ab3 needs to be specifided for Ademamix"
             optimizer = AdEMAMix(optim_groups, lr=learning_rate, betas=betas+(beta3,), weight_decay=weight_decay, alpha=alpha, T_alpha_beta3=T_ab3)
+
+        elif optimizer == "AdamWScheduleFree":
+            optimizer = AdamWScheduleFree(optim_groups, lr=learning_rate, betas=betas, weight_decay=weight_decay, foreach=True)
+            # see https://x.com/Yuchenj_UW/status/1809622351543484563
+            raise NotImplementedError
 
         else:
             raise NotImplementedError
