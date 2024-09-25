@@ -20,9 +20,9 @@ from utils.misc import format_time
 vocab_size = 50257 # gpt2 enc
 ctx_len = 1024
 
-batch_size = 16
+batch_size = 32
 
-load_dir = "runs/misty-bee-124/"
+load_dir = "runs/misty-fog-136/"
 
 device = "cuda" # "cpu", "cuda:0", "cuda:1", ...
 dtype = "bfloat16" # "float32" or "bfloat16"

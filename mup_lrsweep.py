@@ -31,11 +31,17 @@ from utils.lr_schedules import cosine_warmup_schedule, wsd_schedule
 
 # --------------------------
 
-filename = "transformer.results.json"
-fig_name = "transformer.png"
+# transformer_sp_mup : comparaison entre SP (init_std=0.02) et muP (init_std=0.08) -> ok, pas de gap
+# transformer_sp2 : test avec SP (init_std=0.08) -> loss qui remonte fort
+# -> muP bénéficie bcp de init à 0.08
+
+# transformer_mup : test du transfert de LR avec muP (juste pour être sur) -> niquel
+
+filename = "transformer_mup.results.json"
+fig_name = "transformer_mup.png"
 
 type_to_lr_range = {
-    #"SP": [2**n for n in range(-13, -11 + 1)],
+    #"SP": [2**n for n in range(-9, -9 + 1)],
     "μP": [2**n for n in range(-9, -6 + 1)],
 }
 
@@ -45,7 +51,7 @@ ctx_length = 256
 architecture = "Transformer"
 
 base_width = 64
-widths = [768] # check that for all these widths, d_model is divisible by d_head
+widths = [64, 256, 768] # check that for all these widths, d_model is divisible by d_head
 n_layers = 4
 d_head = 64
 
@@ -107,12 +113,14 @@ def batches():
 def run_experiment(type_: Literal["SP", "μP"], width: int, lr: float) -> List[Dict[str, Any]]:
     if type_ == "μP":
         use_mup = True
+        init_std = 0.08
         
     elif type_ == "SP":
         use_mup = False
+        init_std = 0.02
 
     if architecture == "Transformer":
-        config = TransformerConfig(d_model=width, n_layers=n_layers, n_heads=width//d_head, n_kv_heads=width//d_head, max_len=ctx_length, pos_emb=pos_emb, rope_theta=rope_theta, d_ff=int((8/3) * width), mup=use_mup, mup_base_width=base_width)
+        config = TransformerConfig(d_model=width, n_layers=n_layers, n_heads=width//d_head, n_kv_heads=width//d_head, max_len=ctx_length, pos_emb=pos_emb, rope_theta=rope_theta, d_ff=int((8/3) * width), mup=use_mup, mup_base_width=base_width, base_std=init_std)
     else:
         raise NotImplementedError
 

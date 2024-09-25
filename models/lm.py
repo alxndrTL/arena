@@ -60,8 +60,8 @@ class LM(nn.Module):
                     
                     torch.nn.init.normal_(p, mean=0.0, std=std / math.sqrt(self.config.mup_width_mult), generator=self.rng)
 
-                    if pn.endswith('sa.c_attn.weight'):
-                        torch.nn.init.zeros_(p[self.config.d_model:]) # init query proj to 0
+                    #if pn.endswith('sa.c_attn.weight'):
+                    #    torch.nn.init.zeros_(p[self.config.d_model:]) # init query proj to 0
 
                 elif pn == "embedding.weight":
                     torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std, generator=self.rng)

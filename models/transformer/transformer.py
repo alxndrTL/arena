@@ -125,7 +125,8 @@ class SelfAttentionMultiHead(nn.Module):
         self.c_proj = nn.Linear(config.d_model, config.d_model, bias=False)
         self.rotary = Rotary(config.d_head)
 
-        self.scale = self.config.mup_attn_mult/self.config.d_head if self.config.mup else 1/math.sqrt(self.config.d_head)
+        #self.scale = self.config.mup_attn_mult/self.config.d_head if self.config.mup else 1/math.sqrt(self.config.d_head)
+        self.scale = 1/math.sqrt(self.config.d_head)
 
     def forward(self, x, cache=None):
         B, T, _ = x.size()

@@ -22,7 +22,7 @@ ctx_len = 1024
 architecture = "Transformer" # "Transformer" or "Mamba" or "Mamba2"
 d_model = 768
 n_layers = 12
-base_std = 0.02
+base_std = 0.08
 
 # Mamba specific
 use_cuda = True # choose True if you can (mamba-ssm installed). else, fallbacks to mamba.py (https://github.com/alxndrTL/mamba.py)
@@ -44,8 +44,8 @@ rope_theta = 10000
 use_flash_attention = True
 
 # --- muP parameters ---
-use_mup = False
-mup_base_width = 288
+use_mup = True
+mup_base_width = 64
 
 # --- training parameters ---
 num_iters = 4768 # 2.5B tokens
@@ -53,9 +53,9 @@ total_batch_size = 512
 micro_batch_size = 16
 
 # LR and scheduler
-schedule = "cosine" # "cosine" or "wsd"
+schedule = "wsd" # "cosine" or "wsd"
 
-lr = 1.8e-3
+lr = 2**(-6)
 lr_warmup_iters = 200
 
 # cosine schedule specific
@@ -64,7 +64,7 @@ lr_min = lr/10
 # wsd schedule specific
 lr_decay_iters = 1000 # 10-20% of num_iters
 
-optimizer = "Ademamix" # "AdamW" or "Ademamix" or "AdamWScheduleFree"
+optimizer = "AdamW" # "AdamW" or "Ademamix" or "AdamWScheduleFree"
 
 weight_decay = 0.1
 adam_b1 = 0.9

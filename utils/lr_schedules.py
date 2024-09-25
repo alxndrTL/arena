@@ -43,5 +43,7 @@ def wsd_schedule(warmup_iters, decay_iters, num_iters, start_iter=0):
         
         # decay (with 1-sqrt)
         else:
+            if decay_iters==0:
+                return 1.
             return 1 - math.sqrt((iter - (num_iters - decay_iters))/decay_iters)
     return schedule
