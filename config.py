@@ -44,7 +44,7 @@ rope_theta = 10000
 use_flash_attention = True
 
 # --- muP parameters ---
-use_mup = False
+use_mup = True
 mup_base_width = 768
 
 # --- training parameters ---
@@ -55,7 +55,7 @@ micro_batch_size = 32 # 16 for width=768, 32 for width=64
 # LR and scheduler
 schedule = "wsd" # "cosine" or "wsd"
 
-lr = 2**(-11)
+lr = 2**(-9)
 lr_warmup_iters = 200
 
 # cosine schedule specific

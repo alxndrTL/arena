@@ -98,6 +98,9 @@ if log_wandb:
                     # muP
                     "use_mup": use_mup,
                     "mup_base_width": mup_base_width,
+                    # ademamix
+                    "adam_b3": adam_b3,
+                    "alpha": alpha,
                     
                 }
             })
