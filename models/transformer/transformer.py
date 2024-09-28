@@ -163,19 +163,20 @@ class RMSNorm(nn.Module):
         self.eps = eps
 
         # https://arxiv.org/abs/2404.05728, RMSNorm gains prevents muTransfer (section 4.2.3)
-        if not use_mup:
-            self.weight = nn.Parameter(torch.ones(dim))
+        #if not use_mup:
+        #    self.weight = nn.Parameter(torch.ones(dim))
 
     def _norm(self, x):
         return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
 
     def forward(self, x):
         output = self._norm(x.float()).type_as(x)
+        return output
 
-        if not self.use_mup:
-            return output * self.weight
-        else:
-            return output
+        #if not self.use_mup:
+        #    return output * self.weight
+        #else:
+        #    return output
 
 # taken from modeling_jamba.py (jamba official implementation)
 # the same as the one in llama2.c model.py, but dim of repeat is 1 instead of 2

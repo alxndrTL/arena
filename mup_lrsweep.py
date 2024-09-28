@@ -37,12 +37,15 @@ from utils.lr_schedules import cosine_warmup_schedule, wsd_schedule
 
 # transformer_mup : test du transfert de LR avec muP (juste pour être sur) -> niquel
 
-filename = "transformer_mup.results.json"
-fig_name = "transformer_mup.png"
+# transformer_mup2 : idem
+# transformer_mup3 : idem mais base_width=768 (pour voir su le transfert tient tjrs)
+
+filename = "transformer_mup3.results.json"
+fig_name = "transformer_mup3.png"
 
 type_to_lr_range = {
     #"SP": [2**n for n in range(-9, -9 + 1)],
-    "μP": [2**n for n in range(-9, -6 + 1)],
+    "μP": [2**n for n in range(-14, -13 + 1)],
 }
 
 ctx_length = 256
@@ -50,7 +53,7 @@ ctx_length = 256
 # --- model parameters ---
 architecture = "Transformer"
 
-base_width = 64
+base_width = 768
 widths = [64, 256, 768] # check that for all these widths, d_model is divisible by d_head
 n_layers = 4
 d_head = 64

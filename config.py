@@ -20,9 +20,9 @@ ctx_len = 1024
 
 # --- model parameters ---
 architecture = "Transformer" # "Transformer" or "Mamba" or "Mamba2"
-d_model = 768
+d_model = 64
 n_layers = 12
-base_std = 0.08
+base_std = 0.02
 
 # Mamba specific
 use_cuda = True # choose True if you can (mamba-ssm installed). else, fallbacks to mamba.py (https://github.com/alxndrTL/mamba.py)
@@ -33,9 +33,9 @@ d_head = 64
 d_state = 128
 
 # Transformer specific
-d_ff = 2048
-n_heads = 12
-n_kv_heads = 12 # n_heads is MHA, 1 is MQA (multi query), in between is GQA (grouped query attention)
+d_ff = 172
+n_heads = 1
+n_kv_heads = 1 # n_heads is MHA, 1 is MQA (multi query), in between is GQA (grouped query attention)
 dropout = 0.
 
 pos_emb = "rope" # "absolute" or "rope"
@@ -44,18 +44,18 @@ rope_theta = 10000
 use_flash_attention = True
 
 # --- muP parameters ---
-use_mup = True
-mup_base_width = 64
+use_mup = False
+mup_base_width = 768
 
 # --- training parameters ---
-num_iters = 4768 # 2.5B tokens
+num_iters = 4768 # 4768 = 2.5B tokens, with tbs=512 # 2500 = 36M tokens with bs=14
 total_batch_size = 512
-micro_batch_size = 16
+micro_batch_size = 32 # 16 for width=768, 32 for width=64
 
 # LR and scheduler
 schedule = "wsd" # "cosine" or "wsd"
 
-lr = 2**(-6)
+lr = 2**(-11)
 lr_warmup_iters = 200
 
 # cosine schedule specific
@@ -64,14 +64,14 @@ lr_min = lr/10
 # wsd schedule specific
 lr_decay_iters = 1000 # 10-20% of num_iters
 
-optimizer = "AdamW" # "AdamW" or "Ademamix" or "AdamWScheduleFree"
+optimizer = "Ademamix" # "AdamW" or "Ademamix" or "AdamWScheduleFree"
 
-weight_decay = 0.1
+weight_decay = 0.
 adam_b1 = 0.9
 adam_b2 = 0.95
 
 # Ademamix specific (we set T_alpha_beta3 to T)
-adam_b3 = 0.999 # heuristic: half of informations comes from last ln(0.5)/ln(b3) gradients
+adam_b3 = 0.997 # heuristic: half of informations comes from last ln(0.5)/ln(b3) gradients
 alpha = 5
 
 max_grad_norm = 1.0
@@ -83,7 +83,7 @@ dtype = "bfloat16" # "float32" or "bfloat16"
 
 # --- saving/checkpointing parameters ---
 save_dir = "runs/" # where to save to
-ckpt_interval = 1000 # None if you don't want checkpointing
+ckpt_interval = 10000 # None if you don't want checkpointing
 # size of each checkpointing file, in MB : 12 * number of parameters (in M)
 
 ckpt = "" # if you want to restart training from a checkpoint (path/to/model.pth)
