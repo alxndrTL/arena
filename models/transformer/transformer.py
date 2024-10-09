@@ -59,7 +59,7 @@ class Transformer(nn.Module):
         if self.config.pos_emb == "absolute":
             self.PE = nn.Embedding(config.max_len, config.d_model)
 
-        self.layers = nn.ModuleList([DecoderLayer(config) for _ in range(config.n_layers)])
+        self.layers = nn.ModuleList([DecoderLayer(config, i+1) for i in range(config.n_layers)])
         
         self.in_dropout = nn.Dropout(config.dropout)
 
@@ -82,13 +82,14 @@ class Transformer(nn.Module):
         return X
 
 class DecoderLayer(nn.Module):
-    def __init__(self, config: TransformerConfig):
+    def __init__(self, config: TransformerConfig, depth: int):
         super().__init__()
 
         self.sa_scale = (1 / math.sqrt(2 * config.n_layers))
 
         self.attention_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
         self.sa = SelfAttentionMultiHead(config)
+        #self.sa = SelfDifferientialAttentionMultiHead(config, depth)
         self.mlp_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
         self.mlp = MLP(config)
         
@@ -156,8 +157,8 @@ class SelfAttentionMultiHead(nn.Module):
         return y
     
 # todo : handle n_kv_heads!=n_heads
-def lambda_init_fn(depth):
-    return 0.8 - 0.6 * math.exp(-0.3 * depth)
+def lambda_init_fn(depth): # depth in [|1, L|]
+    return 0.8 - 0.6 * math.exp(-0.3 * (depth-1))
 
 class SelfDifferientialAttentionMultiHead(nn.Module):
     def __init__(self, config: TransformerConfig, depth: int):
@@ -168,7 +169,7 @@ class SelfDifferientialAttentionMultiHead(nn.Module):
         self.d_head = config.d_head//2
         self.kv_rep = 1
         
-        self.c_attn = nn.Linear(config.d_model, (self.n_heads + 2 * self.heads) * self.d_head, bias=False)
+        self.c_attn = nn.Linear(config.d_model, (2 * self.n_heads + 2 * 2 * self.n_heads) * self.d_head, bias=False)
         self.c_proj = nn.Linear(config.d_model, config.d_model, bias=False)
         self.rotary = Rotary(self.d_head)
 
@@ -216,7 +217,7 @@ class SelfDifferientialAttentionMultiHead(nn.Module):
         attn = attn * (1 - self.lambda_init)
 
         attn = attn.transpose(1, 2).contiguous().view(B, T, self.config.d_model)
-        y = self.c_proj(y)
+        y = self.c_proj(attn)
 
         #attn = attn.reshape(bsz, tgt_len, self.num_heads * 2 * self.head_dim)
 

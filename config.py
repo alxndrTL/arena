@@ -20,7 +20,7 @@ ctx_len = 1024
 
 # --- model parameters ---
 architecture = "Transformer" # "Transformer" or "Mamba" or "Mamba2"
-d_model = 768
+d_model = 64
 n_layers = 12
 base_std = 0.02
 
@@ -33,9 +33,9 @@ d_head = 64
 d_state = 128
 
 # Transformer specific
-d_ff = 2048
-n_heads = 12
-n_kv_heads = 12 # n_heads is MHA, 1 is MQA (multi query), in between is GQA (grouped query attention)
+d_ff = 172
+n_heads = 1
+n_kv_heads = 1 # n_heads is MHA, 1 is MQA (multi query), in between is GQA (grouped query attention)
 dropout = 0.
 
 pos_emb = "rope" # "absolute" or "rope"
@@ -44,18 +44,18 @@ rope_theta = 10000
 use_flash_attention = True
 
 # --- muP parameters ---
-use_mup = True
+use_mup = False
 mup_base_width = 768
 
 # --- training parameters ---
 num_iters = 4768 # 4768 = 2.5B tokens, with tbs=512 # 2500 = 36M tokens with bs=14
 total_batch_size = 512
-micro_batch_size = 16 # 16 for width=768, 32 for width=64
+micro_batch_size = 32 # 16 for width=768, 32 for width=64
 
 # LR and scheduler
 schedule = "wsd" # "cosine" or "wsd"
 
-lr = 2**(-9)
+lr = 2**(-7)
 lr_warmup_iters = 200
 
 # cosine schedule specific
@@ -64,7 +64,7 @@ lr_min = lr/10
 # wsd schedule specific
 lr_decay_iters = 1000 # 10-20% of num_iters
 
-optimizer = "Ademamix" # "AdamW" or "Ademamix" or "AdamWScheduleFree"
+optimizer = "AdamW" # "AdamW" or "Ademamix" or "AdamWScheduleFree"
 
 weight_decay = 0.1
 adam_b1 = 0.9
