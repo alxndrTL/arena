@@ -136,7 +136,7 @@ class LM(nn.Module):
             self.apply(self._init_weights)
             for pn, p in self.named_parameters():
                 if pn.endswith('fc_2.weight') or pn.endswith('c_proj.weight') or pn.endswith('mixer.out_proj.weight'):
-                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std/math.sqrt(2 * self.config.n_layers), generator=self.rng)
+                    torch.nn.init.normal_(p, mean=0.0, std=self.config.base_std/math.sqrt(2 * self.config.n_layers))#, generator=self.rng)
 
     def forward(self, tokens, targets=None, caches=None, seq_pos=0):
         # tokens : (B, L)
@@ -383,11 +383,11 @@ class LM(nn.Module):
     # taken from llama2.c
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std, generator=self.rng)
+            torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std)#, generator=self.rng)
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std, generator=self.rng)
+            torch.nn.init.normal_(module.weight, mean=0.0, std=self.config.base_std)#, generator=self.rng)
 
     # adapted from llama2.c, with muP
     def configure_optimizers(self, optimizer, weight_decay, learning_rate, betas, device_type, beta3=None, alpha=None, T_ab3=None):

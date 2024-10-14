@@ -206,7 +206,7 @@ try:
                 model.train()
 
         # checkpointing
-        if (ckpt_interval and iter % ckpt_interval == 0) or (schedule == "wsd" and (iter == num_iters-lr_decay_iters)):
+        if (ckpt_interval and iter % ckpt_interval == 0 and iter > 0) or (schedule == "wsd" and (iter == num_iters-lr_decay_iters)):
             
             dirname = f"ckpt_{iter}/"
             if (schedule == "wsd" and (iter == num_iters-lr_decay_iters)):

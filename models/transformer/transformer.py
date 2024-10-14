@@ -26,6 +26,8 @@ class TransformerConfig:
     d_ff: int = None
     n_kv_heads: Optional[int] = None # None=n_heads is MHA, 1 is MQA (multi query), in between is GQA (grouped)
 
+    diff_transformer: bool = False
+
     pos_emb: str = "absolute" # absolute, rope
     rope_theta: float = 10000
 
@@ -88,8 +90,10 @@ class DecoderLayer(nn.Module):
         self.sa_scale = (1 / math.sqrt(2 * config.n_layers))
 
         self.attention_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
-        self.sa = SelfAttentionMultiHead(config)
-        #self.sa = SelfDifferientialAttentionMultiHead(config, depth)
+        if config.diff_transformer:
+            self.sa = SelfDifferientialAttentionMultiHead(config, depth)
+        else:
+            self.sa = SelfAttentionMultiHead(config)
         self.mlp_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
         self.mlp = MLP(config)
         
@@ -165,8 +169,8 @@ class SelfDifferientialAttentionMultiHead(nn.Module):
         super().__init__()
         self.config = config
 
-        self.n_heads = config.n_heads
-        self.d_head = config.d_head//2
+        self.n_heads = config.n_heads//2
+        self.d_head = config.d_head
         self.kv_rep = 1
         
         self.c_attn = nn.Linear(config.d_model, (2 * self.n_heads + 2 * 2 * self.n_heads) * self.d_head, bias=False)
@@ -218,32 +222,16 @@ class SelfDifferientialAttentionMultiHead(nn.Module):
 
         attn = attn.transpose(1, 2).contiguous().view(B, T, self.config.d_model)
         y = self.c_proj(attn)
-
-        #attn = attn.reshape(bsz, tgt_len, self.num_heads * 2 * self.head_dim)
-
-        # GQA : expand K and V to compute standard attention
-        #k = repeat_kv(k, self.config.kv_rep)
-        #v = repeat_kv(v, self.config.kv_rep)
-
-        # attention computation
-        #y = F.scaled_dot_product_attention(q, k, v, is_causal=(cache is None), scale=self.scale)
-        #y = y.transpose(1, 2).contiguous().view(B, T, self.config.d_model)
-        
-        # output projection
-        #y = self.c_proj(y)
         return y
 
 # todo : remove dim, use_mup
 class RMSNorm(nn.Module):
-    def __init__(self, dim: int, eps: float, use_mup: bool):
+    def __init__(self, eps: float):
         super().__init__()
 
-        self.use_mup = use_mup
         self.eps = eps
 
-        # https://arxiv.org/abs/2404.05728, RMSNorm gains prevents muTransfer (section 4.2.3)
-        #if not use_mup:
-        #    self.weight = nn.Parameter(torch.ones(dim))
+        # https://arxiv.org/abs/2404.05728 RMSNorm gains prevents muTransfer (section 4.2.3)
 
     def _norm(self, x):
         return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
@@ -251,11 +239,6 @@ class RMSNorm(nn.Module):
     def forward(self, x):
         output = self._norm(x.float()).type_as(x)
         return output
-
-        #if not self.use_mup:
-        #    return output * self.weight
-        #else:
-        #    return output
 
 # taken from modeling_jamba.py (jamba official implementation)
 # the same as the one in llama2.c model.py, but dim of repeat is 1 instead of 2

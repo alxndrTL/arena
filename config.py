@@ -19,7 +19,7 @@ vocab_size = 50257 # gpt2 enc
 ctx_len = 1024
 
 # --- model parameters ---
-architecture = "Transformer" # "Transformer" or "Mamba" or "Mamba2"
+architecture = "Transformer" # "Transformer", "Mamba" or "Mamba2"
 d_model = 64
 n_layers = 12
 base_std = 0.02
@@ -34,9 +34,10 @@ d_state = 128
 
 # Transformer specific
 d_ff = 172
-n_heads = 1
-n_kv_heads = 1 # n_heads is MHA, 1 is MQA (multi query), in between is GQA (grouped query attention)
+n_heads = 2
+n_kv_heads = 2 # n_heads is MHA, 1 is MQA (multi query), in between is GQA (grouped query attention)
 dropout = 0.
+diff_transformer = True
 
 pos_emb = "rope" # "absolute" or "rope"
 rope_theta = 10000
@@ -50,7 +51,7 @@ mup_base_width = 768
 # --- training parameters ---
 num_iters = 4768 # 4768 = 2.5B tokens, with tbs=512 # 2500 = 36M tokens with bs=14
 total_batch_size = 512
-micro_batch_size = 32 # 16 for width=768, 32 for width=64
+micro_batch_size = 16 # 16 for width=768, 32 for width=64
 
 # LR and scheduler
 schedule = "wsd" # "cosine" or "wsd"
@@ -76,7 +77,7 @@ alpha = 5
 
 max_grad_norm = 1.0
 
-use_torch_compile = True # do not toggle if using Mamba
+use_torch_compile = False # do not toggle if using Mamba
 
 device = "cuda" # "cpu", "cuda:0", "cuda:1", ...
 dtype = "bfloat16" # "float32" or "bfloat16"
@@ -99,7 +100,7 @@ eval_val_iters = 50
 # ---------------------------------------------
 
 if architecture == "Transformer":
-    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, dropout=dropout, max_len=ctx_len, flash=use_flash_attention)
+    config = TransformerConfig(d_model=d_model, n_layers=n_layers, n_heads=n_heads, n_kv_heads=n_kv_heads, d_ff=d_ff, diff_transformer=diff_transformer, pos_emb=pos_emb, rope_theta=rope_theta, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, dropout=dropout, max_len=ctx_len, flash=use_flash_attention)
 elif architecture == "Mamba":
     config = MambaConfig(d_model=d_model, n_layers=n_layers, bias=bias, base_std=base_std, mup=use_mup, mup_base_width=mup_base_width, use_cuda=use_cuda)
 elif architecture == "Mamba2":
