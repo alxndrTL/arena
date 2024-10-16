@@ -70,6 +70,7 @@ if log_wandb:
                     "base_std": base_std,
                     # Transformer
                     "d_ff": d_ff,
+                    "diff_transformer": diff_transformer,
                     "n_heads": n_heads,
                     "n_kv_heads": n_kv_heads,
                     "dropout": dropout,
