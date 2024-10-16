@@ -89,12 +89,12 @@ class DecoderLayer(nn.Module):
 
         self.sa_scale = (1 / math.sqrt(2 * config.n_layers))
 
-        self.attention_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
+        self.attention_norm = RMSNorm(config.norm_eps)
         if config.diff_transformer:
             self.sa = SelfDifferientialAttentionMultiHead(config, depth)
         else:
             self.sa = SelfAttentionMultiHead(config)
-        self.mlp_norm = RMSNorm(config.d_model, config.norm_eps, config.mup)
+        self.mlp_norm = RMSNorm(config.norm_eps)
         self.mlp = MLP(config)
         
     def forward(self, X):
@@ -182,7 +182,7 @@ class SelfDifferientialAttentionMultiHead(nn.Module):
         self.lambda_k1 = nn.Parameter(torch.zeros(self.d_head, dtype=torch.float32).normal_(mean=0,std=0.1))
         self.lambda_q2 = nn.Parameter(torch.zeros(self.d_head, dtype=torch.float32).normal_(mean=0,std=0.1))
         self.lambda_k2 = nn.Parameter(torch.zeros(self.d_head, dtype=torch.float32).normal_(mean=0,std=0.1))
-        self.subln = RMSNorm(dim=2*self.d_head, eps=1e-5, use_mup=False)
+        self.subln = RMSNorm(eps=1e-5)
 
         self.scale = 1/math.sqrt(self.config.d_head)
 
